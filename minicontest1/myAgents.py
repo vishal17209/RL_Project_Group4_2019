@@ -35,7 +35,7 @@ class MyAgent(Agent):
         """
         Returns the next action the agent will take
         """
-
+        
         "*** YOUR CODE HERE ***"
 
         raise NotImplementedError()
@@ -69,6 +69,8 @@ class ClosestDotAgent(Agent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState, self.index)
 
+        # method_list = [func for func in dir(gameState) if callable(getattr(gameState, func))]
+        # print(method_list)
 
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
