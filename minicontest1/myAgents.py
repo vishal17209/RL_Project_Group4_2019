@@ -18,12 +18,15 @@ import util
 import time
 import search
 
+
+import random
+
 """
 IMPORTANT
 `agent` defines which agent you will use. By default, it is set to ClosestDotAgent,
 but when you're ready to test your own agent, replace it with MyAgent
 """
-def createAgents(num_pacmen, agent='ClosestDotAgent'):
+def createAgents(num_pacmen, agent='MyAgent'):
     return [eval(agent)(index=i) for i in range(num_pacmen)]
 
 class MyAgent(Agent):
@@ -35,10 +38,20 @@ class MyAgent(Agent):
         """
         Returns the next action the agent will take
         """
-        
+        # print(state)
+        # print(state.getPacmanPositions())
+        # print(state.getGhostPositions())
+        # # method_list = [func for func in dir(state) if callable(getattr(state, func))]
+        # # print(method_list)
+        # input('continue?')
+        # print(state.getLegalActions())
+        a = state.getLegalActions()
+        # print(a[0])
+        return a[0] 
+
         "*** YOUR CODE HERE ***"
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
     def initialize(self):
         """
@@ -48,8 +61,7 @@ class MyAgent(Agent):
         """
 
         "*** YOUR CODE HERE"
-
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
 """
 Put any other SearchProblems or search methods below. You may also import classes/methods in

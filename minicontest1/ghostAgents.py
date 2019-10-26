@@ -69,7 +69,8 @@ class DirectionalGhost(GhostAgent):
         actionVectors = [Actions.directionToVector(
             a, speed) for a in legalActions]
         newPositions = [(pos[0]+a[0], pos[1]+a[1]) for a in actionVectors]
-        pacmanPosition = state.getPacmanPosition()
+        # pacmanPosition = state.getPacmanPosition()
+        pacmanPosition = state.getPacmanPosition(0)
 
         # Select best actions given the state
         distancesToPacman = [manhattanDistance(
