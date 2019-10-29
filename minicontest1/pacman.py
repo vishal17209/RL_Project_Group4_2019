@@ -291,8 +291,12 @@ class ClassicGameRules:
         self.timeout = timeout
 
     def newGame( self, layout, pacmanAgents, ghostAgents, display, quiet = False, catchExceptions=False):
+<<<<<<< HEAD
         # agents = pacmanAgents + ghostAgents[:layout.getNumGhosts()]
         agents = pacmanAgents + ghostAgents
+=======
+        agents = pacmanAgents + ghostAgents[:layout.getNumGhosts()]
+>>>>>>> master
         initState = GameState()
         initState.initialize( layout, len(pacmanAgents), len(ghostAgents) )
         game = Game(agents, display, self, catchExceptions=catchExceptions)
@@ -524,7 +528,11 @@ def readCommand( argv ):
                       help=default('the ghost agent TYPE in the ghostAgents module to use'),
                       metavar = 'TYPE', default='RandomGhost')
     parser.add_option('-k', '--numghosts', type='int', dest='numGhosts',
+<<<<<<< HEAD
                       help=default('The maximum number of ghosts to use'), default=2)
+=======
+                      help=default('The maximum number of ghosts to use'), default=0)
+>>>>>>> master
     parser.add_option('-z', '--zoom', type='float', dest='zoom',
                       help=default('Zoom the size of the graphics window'), default=1.0)
     parser.add_option('-f', '--fixRandomSeed', action='store_true', dest='fixRandomSeed',
@@ -544,6 +552,7 @@ def readCommand( argv ):
     parser.add_option('--timeout', dest='timeout', type='int',
                       help=default('Maximum length of time an agent can spend computing in a single game'), default=30)
 
+<<<<<<< HEAD
     ###########################################################
     parser.add_option('--numPacmen', dest='numPacmen', type='int',
                       help=default('The number of Pacman Agents'), default=2)
@@ -553,6 +562,12 @@ def readCommand( argv ):
     if len(otherjunk) != 0:
         raise Exception('Command line input not understood: ' + str(otherjunk))
     # options.numGhosts = 0
+=======
+    options, otherjunk = parser.parse_args(argv)
+    if len(otherjunk) != 0:
+        raise Exception('Command line input not understood: ' + str(otherjunk))
+    options.numGhosts = 0
+>>>>>>> master
     args = dict()
 
     # Fix the random seed
@@ -576,8 +591,12 @@ def readCommand( argv ):
         args['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts: agentOpts['numTraining'] = options.numTraining
     # pacman = pacmanType(**agentOpts) # Instantiate Pacman with agentArgs
+<<<<<<< HEAD
     # pacmen = pacmanType(args["layout"].getNumPacmen())
     pacmen = pacmanType(options.numPacmen)
+=======
+    pacmen = pacmanType(args["layout"].getNumPacmen())
+>>>>>>> master
     args['pacmen'] = pacmen
 
     # Don't display training games
@@ -588,8 +607,13 @@ def readCommand( argv ):
     # Choose a ghost agent
     ghostType = loadAgent(options.ghost, noKeyboard)
     args['ghosts'] = [ghostType( i ) for i in range( options.numPacmen, options.numPacmen + options.numGhosts )]
+<<<<<<< HEAD
     print(args['ghosts'])
     # args['ghosts'] = []
+=======
+    args['ghosts'] = []
+
+>>>>>>> master
     # Choose a display format
     if options.quietGraphics:
         import textDisplay
