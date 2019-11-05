@@ -45,6 +45,15 @@ class QLearningAgent(ReinforcementAgent):
 		"*** YOUR CODE HERE ***"
 		self.action_values = util.Counter()
 
+	def thisIsIT(self, state):
+		pacmanPosition = state.getPacmanPosition()
+		grid = state.data.ToList()
+		height, width = state.data.layout.height, state.data.layout.width
+		new_state = grid.data[max(0, pacmanPosition[0]-2):min(height-1, pacmanPosition[0]+2)][max(0, pacmanPosition[1]-2):min(width-1, pacmanPosition[1]+2)]
+
+		return new_state
+
+
 	def getQValue(self, state, action):
 		"""
 		  Returns Q(state,action)
@@ -53,7 +62,6 @@ class QLearningAgent(ReinforcementAgent):
 		"""
 		"*** YOUR CODE HERE ***"
 		self.action_values[(state, action)]
-
 
 	def computeValueFromQValues(self, state):
 		"""
@@ -69,14 +77,14 @@ class QLearningAgent(ReinforcementAgent):
 		else:
 			return max(values)
 
-	def computeActionFromQValues(self, state):
+	def computeActionFromQValues(self, state, compressed_state):
 		"""
 		  Compute the best action to take in a state.  Note that if there
 		  are no legal actions, which is the case at the terminal state,
 		  you should return None.
 		"""
 		"*** YOUR CODE HERE ***"
-		values = [self.action_values[(state, action)] for action in self.getLegalActions(state)]
+		values = [self.action_values[(compressed_state, action)] for action in self.getLegalActions(state)]
 		opt_value = 0
 		if(len(values) == 0):
 			opt_value = 0.0
@@ -84,7 +92,7 @@ class QLearningAgent(ReinforcementAgent):
 			opt_value = max(values)
 		
 		for action in self.getLegalActions(state):
-			if(self.action_values[(state, action)] == opt_value):
+			if(self.action_values[(compressed_state, action)] == opt_value):
 				return action
 
 	def getAction(self, state):
@@ -99,13 +107,14 @@ class QLearningAgent(ReinforcementAgent):
 		  HINT: To pick randomly from a list, use random.choice(list)
 		"""
 		# Pick Action
+		compressed_state = self.thisIsIT(state)
 		legalActions = self.getLegalActions(state)
 		action = None
 		"*** YOUR CODE HERE ***"
 		if(len(legalActions) != 0):
 			if(random.random() < self.epsilon):
 				return random.choice(legalActions)
-			return self.computeActionFromQValues(state)
+			return self.computeActionFromQValues(state, compressed_state)
 		return action
 
 	def update(self, state, action, nextState, reward):
@@ -118,13 +127,15 @@ class QLearningAgent(ReinforcementAgent):
 		  it will be called on your behalf
 		"""
 		"*** YOUR CODE HERE ***"
-		self.action_values[(state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState) - self.action_values[(state, action)])
+		compressed_state = str(self.thisIsIT(state))
+		compressed_nextState = str(self.thisIsIT(nextState))
+		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
 
-	def getPolicy(self, state):
-		return self.computeActionFromQValues(state)
+	# def getPolicy(self, state):
+	# 	return self.computeActionFromQValues(state)
 
-	def getValue(self, state):
-		return self.computeValueFromQValues(state)
+	# def getValue(self, state):
+	# 	return self.computeValueFromQValues(state)
 
 
 class PacmanQAgent(QLearningAgent):
