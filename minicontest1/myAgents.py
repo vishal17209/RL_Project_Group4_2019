@@ -35,7 +35,7 @@ class MyAgent(Agent):
         """
         Returns the next action the agent will take
         """
-        
+
         "*** YOUR CODE HERE ***"
 
         raise NotImplementedError()
@@ -69,11 +69,27 @@ class ClosestDotAgent(Agent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState, self.index)
 
-        # method_list = [func for func in dir(gameState) if callable(getattr(gameState, func))]
-        # print(method_list)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+        fringe = util.Queue()
+        visited = []        # List of already visited nodes
+        action_list = []    # List of actions taken to get to the current node
+        total_cost = 0      # Cost to get to the current node
+        initial = problem.getStartState()   # Starting state of the problem
+
+        fringe.push((initial, action_list))
+
+        while fringe: 
+            node, actions = fringe.pop() 
+            if not node in visited:
+                visited.append(node)
+                if problem.isGoalState(node):
+                    return actions
+                successors = problem.getSuccessors(node)
+                for successor in successors:
+                    coordinate, direction, cost = successor
+                    fringe.push((coordinate, actions + [direction]))
 
     def getAction(self, state):
         return self.findPathToClosestDot(state)[0]
@@ -112,5 +128,5 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        # util.raiseNotDefined()
+        return self.food[x][y]
