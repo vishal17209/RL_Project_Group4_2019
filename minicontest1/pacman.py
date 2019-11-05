@@ -460,9 +460,14 @@ class GhostRules:
             # Added for first-person
             state.data._eaten[agentIndex] = True
         else:
+            print(state.data.deathCount) #whoami
             if not state.data._win:
-                state.data.scoreChange -= 500
-                state.data._lose = True
+                state.data.scoreChange -= 10 #whoami
+                # state.data._lose = False#True #whoami
+                state.data.deathCount+=1
+                if(state.data.deathCount>=2):
+                    state.data._lose=True
+                #whoami
     collide = staticmethod( collide )
 
     def canKill( pacmanPosition, ghostPosition ):
