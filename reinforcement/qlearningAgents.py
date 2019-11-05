@@ -49,7 +49,7 @@ class QLearningAgent(ReinforcementAgent):
 		pacmanPosition = state.getPacmanPosition()
 		grid = state.data.ToList()
 		height, width = state.data.layout.height, state.data.layout.width
-		new_state = grid.data[max(0, pacmanPosition[0]-2):min(height-1, pacmanPosition[0]+2)][max(0, pacmanPosition[1]-2):min(width-1, pacmanPosition[1]+2)]
+		new_state = grid.data[max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)][max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)]
 
 		return new_state
 
@@ -63,7 +63,7 @@ class QLearningAgent(ReinforcementAgent):
 		"*** YOUR CODE HERE ***"
 		self.action_values[(state, action)]
 
-	def computeValueFromQValues(self, state):
+	def computeValueFromQValues(self, state, compressed_state):
 		"""
 		  Returns max_action Q(state,action)
 		  where the max is over legal actions.  Note that if
@@ -71,7 +71,7 @@ class QLearningAgent(ReinforcementAgent):
 		  terminal state, you should return a value of 0.0.
 		"""
 		"*** YOUR CODE HERE ***"
-		values = [self.action_values[(state, action)] for action in self.getLegalActions(state)]
+		values = [self.action_values[(compressed_state, action)] for action in self.getLegalActions(state)]
 		if(len(values) == 0):
 			return 0.0
 		else:
@@ -107,7 +107,7 @@ class QLearningAgent(ReinforcementAgent):
 		  HINT: To pick randomly from a list, use random.choice(list)
 		"""
 		# Pick Action
-		compressed_state = self.thisIsIT(state)
+		compressed_state = str(self.thisIsIT(state))
 		legalActions = self.getLegalActions(state)
 		action = None
 		"*** YOUR CODE HERE ***"
@@ -183,6 +183,14 @@ class ApproximateQAgent(PacmanQAgent):
 		PacmanQAgent.__init__(self, **args)
 		self.weights = util.Counter()
 
+	def thisIsIT(self, state):
+		pacmanPosition = state.getPacmanPosition()
+		grid = state.data.ToList()
+		height, width = state.data.layout.height, state.data.layout.width
+		new_state = grid.data[max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)][max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)]
+
+		return new_state
+
 	def getWeights(self):
 		return self.weights
 
@@ -192,14 +200,20 @@ class ApproximateQAgent(PacmanQAgent):
 		  where * is the dotProduct operator
 		"""
 		"*** YOUR CODE HERE ***"
-		util.raiseNotDefined()
+		compressed_state = str(self.thisIsIT(state))
+		feature_vector = self.featExtractor.getFeatures(compressed_state, action)
+		return self.weights*feature_vector
 
 	def update(self, state, action, nextState, reward):
 		"""
 		   Should update your weights based on transition
 		"""
 		"*** YOUR CODE HERE ***"
-		util.raiseNotDefined()
+		compressed_state = str(self.thisIsIT(state))
+		diff = reward + self.discount*self.computeValueFromQValues(state, compressed_state) - self.getQValue(state, action)
+		feature_vector = self.featExtractor.getFeatures(compressed_state, action)
+		for key in feature_vector.keys():
+			self.weights[key] += self.alpha*diff*feature_vector[key]
 
 	def final(self, state):
 		"Called at the end of each game."
