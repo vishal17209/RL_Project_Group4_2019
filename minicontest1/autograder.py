@@ -1,5 +1,4 @@
-#hat laude
-#bhag na yahan se
+#git commit
 import json
 import argparse
 import glob
