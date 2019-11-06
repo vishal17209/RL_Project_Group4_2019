@@ -118,7 +118,7 @@ class GameState:
             GhostRules.decrementTimer( state.data.agentStates[agentIndex] )
 
         # Resolve multi-agent effects
-        GhostRules.checkDeath( state, agentIndex, self.data.numPacmanAgents, self.data.numGhostAgents )
+        GhostRules.bhag_madarcho( state, agentIndex, self.data.numPacmanAgents, self.data.numGhostAgents )
 
         # Book keeping
         state.data._agentMoved = agentIndex
