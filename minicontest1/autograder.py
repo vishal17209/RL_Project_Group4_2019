@@ -1,10 +1,9 @@
-#git commit
 import json
 import argparse
 import glob
-#lol
-import pacman
 
+import pacman
+#git commit
 
 
 # each evaluation case is a 3-tuple of
