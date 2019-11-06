@@ -118,7 +118,7 @@ class GameState:
             GhostRules.decrementTimer( state.data.agentStates[agentIndex] )
 
         # Resolve multi-agent effects
-        # GhostRules.checkDeath( state, agentIndex, self.data.numPacmanAgents, self.data.numGhostAgents )
+        GhostRules.checkDeath( state, agentIndex, self.data.numPacmanAgents, self.data.numGhostAgents )
 
         # Book keeping
         state.data._agentMoved = agentIndex
@@ -460,9 +460,14 @@ class GhostRules:
             # Added for first-person
             state.data._eaten[agentIndex] = True
         else:
+            print(state.data.deathCount) #whoami
             if not state.data._win:
-                state.data.scoreChange -= 500
-                state.data._lose = True
+                state.data.scoreChange -= 10 #whoami
+                # state.data._lose = False#True #whoami
+                state.data.deathCount+=1
+                if(state.data.deathCount>=2):
+                    state.data._lose=True
+                #whoami
     collide = staticmethod( collide )
 
     def canKill( pacmanPosition, ghostPosition ):
@@ -519,11 +524,11 @@ def readCommand( argv ):
                       help='Display output as text only', default=False)
     parser.add_option('-q', '--quietTextGraphics', action='store_true', dest='quietGraphics',
                       help='Generate minimal output and no graphics', default=False)
-    # parser.add_option('-g', '--ghosts', dest='ghost',
-    #                   help=default('the ghost agent TYPE in the ghostAgents module to use'),
-    #                   metavar = 'TYPE', default='RandomGhost')
-    # parser.add_option('-k', '--numghosts', type='int', dest='numGhosts',
-    #                   help=default('The maximum number of ghosts to use'), default=0)
+    parser.add_option('-g', '--ghosts', dest='ghost',
+                      help=default('the ghost agent TYPE in the ghostAgents module to use'),
+                      metavar = 'TYPE', default='RandomGhost')
+    parser.add_option('-k', '--numghosts', type='int', dest='numGhosts',
+                      help=default('The maximum number of ghosts to use'), default=0)
     parser.add_option('-z', '--zoom', type='float', dest='zoom',
                       help=default('Zoom the size of the graphics window'), default=1.0)
     parser.add_option('-f', '--fixRandomSeed', action='store_true', dest='fixRandomSeed',
@@ -546,7 +551,7 @@ def readCommand( argv ):
     options, otherjunk = parser.parse_args(argv)
     if len(otherjunk) != 0:
         raise Exception('Command line input not understood: ' + str(otherjunk))
-    options.numGhosts = 0
+    # options.numGhosts = 0
     args = dict()
 
     # Fix the random seed
@@ -579,9 +584,9 @@ def readCommand( argv ):
         options.numIgnore = int(agentOpts['numTrain'])
 
     # Choose a ghost agent
-    # ghostType = loadAgent(options.ghost, noKeyboard)
-    # args['ghosts'] = [ghostType( i ) for i in range( options.numPacmen, options.numPacmen + options.numGhosts )]
-    args['ghosts'] = []
+    ghostType = loadAgent(options.ghost, noKeyboard)
+    args['ghosts'] = [ghostType( i ) for i in range( args["layout"].getNumPacmen(), args["layout"].getNumPacmen() + args["layout"].getNumGhosts() )]
+    # args['ghosts'] = []
 
     # Choose a display format
     if options.quietGraphics:

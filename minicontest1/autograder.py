@@ -1,4 +1,4 @@
-#hat laude
+print("lol")
 import json
 import argparse
 import glob
