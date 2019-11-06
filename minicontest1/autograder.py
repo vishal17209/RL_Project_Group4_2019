@@ -3,8 +3,6 @@ import argparse
 import glob
 
 import pacman
-#git commit
-
 
 
 # each evaluation case is a 3-tuple of
