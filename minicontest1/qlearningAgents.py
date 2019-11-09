@@ -156,7 +156,6 @@ class PacmanQAgent(QLearningAgent):
 		args['gamma'] = gamma
 		args['alpha'] = alpha
 		args['numTraining'] = numTraining
-		self.index = 0  # This is always Pacman
 		QLearningAgent.__init__(self, **args)
 
 	def getAction(self, state):
