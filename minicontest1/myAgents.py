@@ -33,25 +33,25 @@ def createAgents(num_pacmen, agent='MyAgent'):
 #     """
 #     Implementation of your agent.
 #     """
-#
+
 #     def getAction(self, state):
 #         """
 #         Returns the next action the agent will take
 #         """
-#
+
 #         "*** YOUR CODE HERE ***"
-#
+
 #         raise NotImplementedError()
-#
+
 #     def initialize(self):
 #         """
 #         Intialize anything you want to here. This function is called
 #         when the agent is first created. If you don't need to use it, then
 #         leave it blank
 #         """
-#
+
 #         "*** YOUR CODE HERE"
-#
+
 #         raise NotImplementedError()
 
 """
@@ -163,6 +163,7 @@ class QLearningAgent(ReinforcementAgent):
 		self.action_values = util.Counter()
 
 	def thisIsIT(self, state):
+		# print("Agent Index: ", self.index)
 		pacmanPosition = state.getPacmanPosition(self.index)
 		grid = state.data.ToList()
 		height, width = state.data.layout.height, state.data.layout.width
@@ -179,7 +180,7 @@ class QLearningAgent(ReinforcementAgent):
 		"*** YOUR CODE HERE ***"
 		self.action_values[(state, action)]
 
-	def computeValueFromQValues(self, state, compressed_state, agentIndex):
+	def computeValueFromQValues(self, state, compressed_state):
 		"""
 		  Returns max_action Q(state,action)
 		  where the max is over legal actions.  Note that if
@@ -187,31 +188,32 @@ class QLearningAgent(ReinforcementAgent):
 		  terminal state, you should return a value of 0.0.
 		"""
 		"*** YOUR CODE HERE ***"
-		values = [self.action_values[(compressed_state, action)] for action in PacmanRules.getLegalActions(state, agentIndex)]
+		values = [self.action_values[(compressed_state, action)] for action in PacmanRules.getLegalActions(state, self.index)]
 		if(len(values) == 0):
 			return 0.0
 		else:
 			return max(values)
 
-	def computeActionFromQValues(self, state, compressed_state, agentIndex):
+	def computeActionFromQValues(self, state, compressed_state):
 		"""
 		  Compute the best action to take in a state.  Note that if there
 		  are no legal actions, which is the case at the terminal state,
 		  you should return None.
 		"""
 		"*** YOUR CODE HERE ***"
-		values = [self.action_values[(compressed_state, action)] for action in PacmanRules.getLegalActions(state, agentIndex)]
+		values = [self.action_values[(compressed_state, action)] for action in PacmanRules.getLegalActions(state, self.index)]
 		opt_value = 0
 		if(len(values) == 0):
 			opt_value = 0.0
 		else:
 			opt_value = max(values)
 
-		for action in self.getLegalActions(state):
+		for action in PacmanRules.getLegalActions(state, self.index):
+			# print(self.action_values[(compressed_state, action)], action)
 			if(self.action_values[(compressed_state, action)] == opt_value):
 				return action
 
-	def getAction(self, state, agentIndex):
+	def getAction(self, state):
 		"""
 		  Compute the action to take in the current state.  With
 		  probability self.epsilon, we should take a random action and
@@ -224,17 +226,17 @@ class QLearningAgent(ReinforcementAgent):
 		"""
 		# Pick Action
 		compressed_state = str(self.thisIsIT(state))
-		legalActions = PacmanRules.getLegalActions(state, agentIndex)
-		print(legalActions)
+		legalActions = PacmanRules.getLegalActions(state, self.index)
+		# print(legalActions)
 		action = None
 		"*** YOUR CODE HERE ***"
 		if(len(legalActions) != 0):
 			if(random.random() < self.epsilon):
 				return random.choice(legalActions)
-			return self.computeActionFromQValues(state, compressed_state, agentIndex)
+			return self.computeActionFromQValues(state, compressed_state)
 		return action
 
-	def update(self, state, action, nextState, reward, agentIndex):
+	def update(self, state, action, nextState, reward):
 		"""
 		  The parent class calls this to observe a
 		  state = action => nextState and reward transition.
@@ -246,7 +248,7 @@ class QLearningAgent(ReinforcementAgent):
 		"*** YOUR CODE HERE ***"
 		compressed_state = str(self.thisIsIT(state))
 		compressed_nextState = str(self.thisIsIT(nextState))
-		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState, agentIndex) - self.action_values[(compressed_state, action)])
+		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
 
 	# def getPolicy(self, state):
 	# 	return self.computeActionFromQValues(state)
@@ -275,12 +277,12 @@ class MyAgent(QLearningAgent):
 		args['numTraining'] = numTraining
 		QLearningAgent.__init__(self, **args)
 
-	def getAction(self, state, agentIndex):
+	def getAction(self, state):
 		"""
 		Simply calls the getAction method of QLearningAgent and then
 		informs parent of action for Pacman.  Do not change or remove this
 		method.
 		"""
-		action = QLearningAgent.getAction(self, state, agentIndex)
-		self.doAction(state, action)
+		action = QLearningAgent.getAction(self,state)
+		self.doAction(state,action)
 		return action

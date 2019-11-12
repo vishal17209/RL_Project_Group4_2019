@@ -612,6 +612,9 @@ class Game:
         self.display.initialize(self.state.data)
         self.numMoves = 0
 
+        # for i in self.agents:
+        #     print(i, i.index)
+
         ###self.display.initialize(self.state.makeObservation(1).data)
         # inform learning agents of the game start
         for i in range(len(self.agents)):
@@ -691,8 +694,7 @@ class Game:
                         start_time = time.time()
                         if skip_action:
                             raise TimeoutFunctionException()
-                        action = timed_func( observation, agentIndex )
-                        # print(action)
+                        action = timed_func( observation )
                     except TimeoutFunctionException:
                         print("Agent %d timed out on a single move!" % agentIndex, file=sys.stderr)
                         self.agentTimeout = True
@@ -727,12 +729,11 @@ class Game:
                     return
             else:
                 # try:
-                # print(agent)
                 timed_func = TimeoutFunction(agent.getAction, int(math.ceil(self.state.data.score / SCALING_FACTOR)))
                 try:
                     start_time = time.time()
-                    action = timed_func( observation, agentIndex )
-                    print(action)
+                    action = timed_func(observation)
+                    # print(action)
                 except TimeoutFunctionException:
                     print('You have run out of compute time! You exceeded {:.3f}s of compute'.format(self.state.data.score / SCALING_FACTOR))
                     self.state.data.score = 0

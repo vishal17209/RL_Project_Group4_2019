@@ -358,7 +358,6 @@ class PacmanRules:
         Edits the state to reflect the results of the action.
         """
         legal = PacmanRules.getLegalActions( state, agentIndex )
-        print(legal)
         if action not in legal:
             raise Exception("Illegal action " + str(action))
 
@@ -461,7 +460,7 @@ class GhostRules:
             # Added for first-person
             state.data._eaten[agentIndex] = True
         else:
-            print(state.data.deathCount) #whoami
+            # print(state.data.deathCount) #whoami
             if not state.data._win:
                 state.data.scoreChange -= 10 #whoami
                 # state.data._lose = False#True #whoami

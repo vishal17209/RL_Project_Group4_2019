@@ -628,14 +628,12 @@ class TimeoutFunction:
             old = signal.signal(signal.SIGALRM, self.handle_timeout)
             signal.alarm(self.timeout)
             try:
-                # print(len(args), len(keyArgs))
                 result = self.function(*args, **keyArgs)
             finally:
                 signal.signal(signal.SIGALRM, old)
             signal.alarm(0)
         else:
             startTime = time.time()
-            print(len(*args), len(**keyArgs))
             result = self.function(*args, **keyArgs)
             timeElapsed = time.time() - startTime
             if timeElapsed >= self.timeout:
