@@ -83,8 +83,8 @@ class ClosestDotAgent(Agent):
 
         fringe.push((initial, action_list))
 
-        while fringe: 
-            node, actions = fringe.pop() 
+        while fringe:
+            node, actions = fringe.pop()
             if not node in visited:
                 visited.append(node)
                 if problem.isGoalState(node):
@@ -211,7 +211,7 @@ class QLearningAgent(ReinforcementAgent):
 			if(self.action_values[(compressed_state, action)] == opt_value):
 				return action
 
-	def getAction(self, state, agentIndex):
+	def getAction(self, state):
 		"""
 		  Compute the action to take in the current state.  With
 		  probability self.epsilon, we should take a random action and
@@ -224,7 +224,7 @@ class QLearningAgent(ReinforcementAgent):
 		"""
 		# Pick Action
 		compressed_state = str(self.thisIsIT(state))
-		legalActions = PacmanRules.getLegalActions(state)
+		legalActions = self.getLegalActions(state)
 		action = None
 		"*** YOUR CODE HERE ***"
 		if(len(legalActions) != 0):
@@ -282,4 +282,4 @@ class MyAgent(QLearningAgent):
 		"""
 		action = QLearningAgent.getAction(self,state)
 		self.doAction(state,action)
-		return acti
+		return action
