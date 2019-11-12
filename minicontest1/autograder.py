@@ -5,6 +5,7 @@ import glob
 import pacman
 
 
+
 # each evaluation case is a 3-tuple of
 # 1. layout (-l in pacman.py)
 # 2. agent number (-s in pacman.py)

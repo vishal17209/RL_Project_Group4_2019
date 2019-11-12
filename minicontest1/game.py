@@ -392,6 +392,7 @@ class GameStateData:
             self.score = prevState.score
             self.numGhostAgents = prevState.numGhostAgents
             self.numPacmanAgents = prevState.numPacmanAgents
+            self.deathCount=prevState.deathCount #whoami
 
         self._foodEaten = None
         self._foodAdded = None
@@ -533,6 +534,7 @@ class GameStateData:
 
         self.numPacmanAgents = numPacmanAgents
         self.numGhostAgents = numGhostAgents
+        self.deathCount=0 #whoami
 
         self.agentStates = []
         numGhosts = 0
@@ -746,12 +748,17 @@ class Game:
             self.unmute()
 
             self.state.data.score += -move_time * SCALING_FACTOR
-            if self.state.data.score <= 0:
-                self.state.data.score = 0
+            # if self.state.data.score <= 0:
+            #     self.state.data.score = 0
+            #     self.state.data._lose = True
+            #     self.rules.process(self.state, self)
+            #     continue #whoami
+            if self.state.data.deathCount >= 2:
+                # self.state.data.score = 0
                 self.state.data._lose = True
                 self.rules.process(self.state, self)
                 continue
-
+                #whoami
 
             # Execute the action
             self.moveHistory.append( (agentIndex, action) )
