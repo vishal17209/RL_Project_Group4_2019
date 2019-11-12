@@ -691,7 +691,8 @@ class Game:
                         start_time = time.time()
                         if skip_action:
                             raise TimeoutFunctionException()
-                        action = timed_func( observation )
+                        action = timed_func( observation, agentIndex )
+                        # print(action)
                     except TimeoutFunctionException:
                         print("Agent %d timed out on a single move!" % agentIndex, file=sys.stderr)
                         self.agentTimeout = True
@@ -726,10 +727,12 @@ class Game:
                     return
             else:
                 # try:
+                # print(agent)
                 timed_func = TimeoutFunction(agent.getAction, int(math.ceil(self.state.data.score / SCALING_FACTOR)))
                 try:
                     start_time = time.time()
-                    action = timed_func(observation)
+                    action = timed_func( observation, agentIndex )
+                    print(action)
                 except TimeoutFunctionException:
                     print('You have run out of compute time! You exceeded {:.3f}s of compute'.format(self.state.data.score / SCALING_FACTOR))
                     self.state.data.score = 0
