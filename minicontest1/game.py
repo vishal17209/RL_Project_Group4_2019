@@ -467,6 +467,33 @@ class GameStateData:
 
         return str(map) + ("\nScore: %d\n" % self.score)
 
+    def ToList(self):
+        width, height = self.layout.width, self.layout.height
+        map = Grid(width, height)
+        if type(self.food) == type((1, 2)):
+            self.food = reconstituteGrid(self.food)
+        for x in range(width):
+            for y in range(height):
+                food, walls = self.food, self.layout.walls
+                map[x][y] = self._foodWallStr(food[x][y], walls[x][y])
+
+        for agentState in self.agentStates:
+            if agentState == None:
+                continue
+            if agentState.configuration == None:
+                continue
+            x, y = [int(i) for i in nearestPoint(agentState.configuration.pos)]
+            agent_dir = agentState.configuration.direction
+            if agentState.isPacman:
+                map[x][y] = self._pacStr(agent_dir)
+            else:
+                map[x][y] = self._ghostStr(agent_dir)
+
+        for x, y in self.capsules:
+            map[x][y] = 'o'
+
+        return map
+
     def _foodWallStr( self, hasFood, hasWall ):
         if hasFood:
             return '.'
