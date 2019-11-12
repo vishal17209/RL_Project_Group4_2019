@@ -1,148 +1,22 @@
-# myAgents.py
-# ---------------
+# qlearningAgents.py
+# ------------------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-from game import Agent
-from searchProblems import PositionSearchProblem
+
+from game import *
 from learningAgents import ReinforcementAgent
+from featureExtractors import *
 
-import random,math
-import util
-import time
-import search
-
-"""
-IMPORTANT
-`agent` defines which agent you will use. By default, it is set to ClosestDotAgent,
-but when you're ready to test your own agent, replace it with MyAgent
-"""
-def createAgents(num_pacmen, agent='MyAgent'):
-    return [eval(agent)(index=i) for i in range(num_pacmen)]
-
-# class MyAgent(Agent):
-#     """
-#     Implementation of your agent.
-#     """
-
-<<<<<<< HEAD
-    def getAction(self, state):
-        """
-        Returns the next action the agent will take
-        """
-
-        "*** YOUR CODE HERE ***"
-=======
-#     def getAction(self, state):
-#         """
-#         Returns the next action the agent will take
-#         """
->>>>>>> c993c5ce06330d11d3d2e9a9313f8e93f4ce3962
-
-#         "*** YOUR CODE HERE ***"
-
-#         raise NotImplementedError()
-
-#     def initialize(self):
-#         """
-#         Intialize anything you want to here. This function is called
-#         when the agent is first created. If you don't need to use it, then
-#         leave it blank
-#         """
-
-#         "*** YOUR CODE HERE"
-
-#         raise NotImplementedError()
-
-"""
-Put any other SearchProblems or search methods below. You may also import classes/methods in
-search.py and searchProblems.py. (ClosestDotAgent as an example below)
-"""
-
-class ClosestDotAgent(Agent):
-
-    def findPathToClosestDot(self, gameState):
-        """
-        Returns a path (a list of actions) to the closest dot, starting from
-        gameState.
-        """
-        # Here are some useful elements of the startState
-        startPosition = gameState.getPacmanPosition(self.index)
-        food = gameState.getFood()
-        walls = gameState.getWalls()
-        problem = AnyFoodSearchProblem(gameState, self.index)
-
-
-        "*** YOUR CODE HERE ***"
-        # util.raiseNotDefined()
-        fringe = util.Queue()
-        visited = []        # List of already visited nodes
-        action_list = []    # List of actions taken to get to the current node
-        total_cost = 0      # Cost to get to the current node
-        initial = problem.getStartState()   # Starting state of the problem
-
-        fringe.push((initial, action_list))
-
-        while fringe: 
-            node, actions = fringe.pop() 
-            if not node in visited:
-                visited.append(node)
-                if problem.isGoalState(node):
-                    return actions
-                successors = problem.getSuccessors(node)
-                for successor in successors:
-                    coordinate, direction, cost = successor
-                    fringe.push((coordinate, actions + [direction]))
-
-    def getAction(self, state):
-        return self.findPathToClosestDot(state)[0]
-
-class AnyFoodSearchProblem(PositionSearchProblem):
-    """
-    A search problem for finding a path to any food.
-
-    This search problem is just like the PositionSearchProblem, but has a
-    different goal test, which you need to fill in below.  The state space and
-    successor function do not need to be changed.
-
-    The class definition above, AnyFoodSearchProblem(PositionSearchProblem),
-    inherits the methods of the PositionSearchProblem.
-
-    You can use this search problem to help you fill in the findPathToClosestDot
-    method.
-    """
-
-    def __init__(self, gameState, agentIndex):
-        "Stores information from the gameState.  You don't need to change this."
-        # Store the food for later reference
-        self.food = gameState.getFood()
-
-        # Store info for the PositionSearchProblem (no need to change this)
-        self.walls = gameState.getWalls()
-        self.startState = gameState.getPacmanPosition(agentIndex)
-        self.costFn = lambda x: 1
-        self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
-
-    def isGoalState(self, state):
-        """
-        The state is Pacman's position. Fill this in with a goal test that will
-        complete the problem definition.
-        """
-        x,y = state
-
-        "*** YOUR CODE HERE ***"
-        # util.raiseNotDefined()
-        return self.food[x][y]
-<<<<<<< HEAD
-=======
+import random,util,math
 
 class QLearningAgent(ReinforcementAgent):
 	"""
@@ -264,7 +138,7 @@ class QLearningAgent(ReinforcementAgent):
 	# 	return self.computeValueFromQValues(state)
 
 
-class MyAgent(QLearningAgent):
+class PacmanQAgent(QLearningAgent):
 	"Exactly the same as QLearningAgent, but with different default parameters"
 
 	def __init__(self, epsilon=0.05,gamma=0.8,alpha=0.2, numTraining=0, **args):
@@ -293,4 +167,60 @@ class MyAgent(QLearningAgent):
 		action = QLearningAgent.getAction(self,state)
 		self.doAction(state,action)
 		return action
->>>>>>> c993c5ce06330d11d3d2e9a9313f8e93f4ce3962
+
+
+class ApproximateQAgent(PacmanQAgent):
+	"""
+	   ApproximateQLearningAgent
+
+	   You should only have to overwrite getQValue
+	   and update.  All other QLearningAgent functions
+	   should work as is.
+	"""
+	def __init__(self, extractor='IdentityExtractor', **args):
+		self.featExtractor = util.lookup(extractor, globals())()
+		PacmanQAgent.__init__(self, **args)
+		self.weights = util.Counter()
+
+	def thisIsIT(self, state):
+		pacmanPosition = state.getPacmanPosition()
+		grid = state.data.ToList()
+		height, width = state.data.layout.height, state.data.layout.width
+		new_state = grid.data[max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)][max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)]
+
+		return new_state
+
+	def getWeights(self):
+		return self.weights
+
+	def getQValue(self, state, action):
+		"""
+		  Should return Q(state,action) = w * featureVector
+		  where * is the dotProduct operator
+		"""
+		"*** YOUR CODE HERE ***"
+		compressed_state = str(self.thisIsIT(state))
+		feature_vector = self.featExtractor.getFeatures(compressed_state, action)
+		return self.weights*feature_vector
+
+	def update(self, state, action, nextState, reward):
+		"""
+		   Should update your weights based on transition
+		"""
+		"*** YOUR CODE HERE ***"
+		compressed_state = str(self.thisIsIT(state))
+		diff = reward + self.discount*self.computeValueFromQValues(state, compressed_state) - self.getQValue(state, action)
+		feature_vector = self.featExtractor.getFeatures(compressed_state, action)
+		for key in feature_vector.keys():
+			self.weights[key] += self.alpha*diff*feature_vector[key]
+
+	def final(self, state):
+		"Called at the end of each game."
+		# call the super-class final method
+		PacmanQAgent.final(self, state)
+
+		# did we finish training?
+		if self.episodesSoFar == self.numTraining:
+			# you might want to print your weights here for debugging
+			"*** YOUR CODE HERE ***"
+			pass
