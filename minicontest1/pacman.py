@@ -118,7 +118,7 @@ class GameState:
             GhostRules.decrementTimer( state.data.agentStates[agentIndex] )
 
         # Resolve multi-agent effects
-        # GhostRules.checkDeath( state, agentIndex, self.data.numPacmanAgents, self.data.numGhostAgents )
+        GhostRules.checkDeath( state, agentIndex, self.data.numPacmanAgents, self.data.numGhostAgents )
 
         # Book keeping
         state.data._agentMoved = agentIndex
@@ -358,9 +358,6 @@ class PacmanRules:
         Edits the state to reflect the results of the action.
         """
         legal = PacmanRules.getLegalActions( state, agentIndex )
-        print(agentIndex)
-        print(state)
-        print(legal)
         if action not in legal:
             raise Exception("Illegal action " + str(action))
 
@@ -590,9 +587,6 @@ def readCommand( argv ):
     ghostType = loadAgent(options.ghost, noKeyboard)
     args['ghosts'] = [ghostType( i ) for i in range( args["layout"].getNumPacmen(), args["layout"].getNumPacmen() + args["layout"].getNumGhosts() )]
     # args['ghosts'] = []
-    # ghostType = loadAgent(options.ghost, noKeyboard)
-    # args['ghosts'] = [ghostType( i ) for i in range( options.numPacmen, options.numPacmen + options.numGhosts )]
-    args['ghosts'] = []
 
     # Choose a display format
     if options.quietGraphics:

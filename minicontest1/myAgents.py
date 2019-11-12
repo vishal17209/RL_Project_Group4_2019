@@ -29,30 +29,30 @@ but when you're ready to test your own agent, replace it with MyAgent
 def createAgents(num_pacmen, agent='MyAgent'):
 	return [eval(agent)(index=i) for i in range(num_pacmen)]
 
-# class MyAgent(Agent):
-#     """
-#     Implementation of your agent.
-#     """
+class MyAgent(Agent):
+    """
+    Implementation of your agent.
+    """
 
-#     def getAction(self, state):
-#         """
-#         Returns the next action the agent will take
-#         """
+    def getAction(self, state):
+        """
+        Returns the next action the agent will take
+        """
 
-#         "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE ***"
 
-#         raise NotImplementedError()
+        raise NotImplementedError()
 
-#     def initialize(self):
-#         """
-#         Intialize anything you want to here. This function is called
-#         when the agent is first created. If you don't need to use it, then
-#         leave it blank
-#         """
+    def initialize(self):
+        """
+        Intialize anything you want to here. This function is called
+        when the agent is first created. If you don't need to use it, then
+        leave it blank
+        """
 
-#         "*** YOUR CODE HERE"
+        "*** YOUR CODE HERE"
 
-#         raise NotImplementedError()
+        raise NotImplementedError()
 
 """
 Put any other SearchProblems or search methods below. You may also import classes/methods in
@@ -61,41 +61,41 @@ search.py and searchProblems.py. (ClosestDotAgent as an example below)
 
 class ClosestDotAgent(Agent):
 
-	def findPathToClosestDot(self, gameState):
-		"""
-		Returns a path (a list of actions) to the closest dot, starting from
-		gameState.
-		"""
-		# Here are some useful elements of the startState
-		startPosition = gameState.getPacmanPosition(self.index)
-		food = gameState.getFood()
-		walls = gameState.getWalls()
-		problem = AnyFoodSearchProblem(gameState, self.index)
+    def findPathToClosestDot(self, gameState):
+        """
+        Returns a path (a list of actions) to the closest dot, starting from
+        gameState.
+        """
+        # Here are some useful elements of the startState
+        startPosition = gameState.getPacmanPosition(self.index)
+        food = gameState.getFood()
+        walls = gameState.getWalls()
+        problem = AnyFoodSearchProblem(gameState, self.index)
 
 
-		"*** YOUR CODE HERE ***"
-		# util.raiseNotDefined()
-		fringe = util.Queue()
-		visited = []        # List of already visited nodes
-		action_list = []    # List of actions taken to get to the current node
-		total_cost = 0      # Cost to get to the current node
-		initial = problem.getStartState()   # Starting state of the problem
+        "*** YOUR CODE HERE ***"
+        # util.raiseNotDefined()
+        fringe = util.Queue()
+        visited = []        # List of already visited nodes
+        action_list = []    # List of actions taken to get to the current node
+        total_cost = 0      # Cost to get to the current node
+        initial = problem.getStartState()   # Starting state of the problem
 
-		fringe.push((initial, action_list))
+        fringe.push((initial, action_list))
 
-		while fringe:
-			node, actions = fringe.pop()
-			if not node in visited:
-				visited.append(node)
-				if problem.isGoalState(node):
-					return actions
-				successors = problem.getSuccessors(node)
-				for successor in successors:
-					coordinate, direction, cost = successor
-					fringe.push((coordinate, actions + [direction]))
+        while fringe: 
+            node, actions = fringe.pop() 
+            if not node in visited:
+                visited.append(node)
+                if problem.isGoalState(node):
+                    return actions
+                successors = problem.getSuccessors(node)
+                for successor in successors:
+                    coordinate, direction, cost = successor
+                    fringe.push((coordinate, actions + [direction]))
 
-	def getAction(self, state):
-		return self.findPathToClosestDot(state)[0]
+    def getAction(self, state):
+        return self.findPathToClosestDot(state)[0]
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
