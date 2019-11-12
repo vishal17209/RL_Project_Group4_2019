@@ -1,2 +1,1 @@
-minicontest1/__pycache__/*
-reinforcement/__pycache__/*
+*.pyc
