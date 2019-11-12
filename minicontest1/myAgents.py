@@ -26,7 +26,7 @@ IMPORTANT
 but when you're ready to test your own agent, replace it with MyAgent
 """
 def createAgents(num_pacmen, agent='MyAgent'):
-    return [eval(agent)(index=i) for i in range(num_pacmen)]
+	return [eval(agent)(index=i) for i in range(num_pacmen)]
 
 # class MyAgent(Agent):
 #     """
@@ -60,78 +60,78 @@ search.py and searchProblems.py. (ClosestDotAgent as an example below)
 
 class ClosestDotAgent(Agent):
 
-    def findPathToClosestDot(self, gameState):
-        """
-        Returns a path (a list of actions) to the closest dot, starting from
-        gameState.
-        """
-        # Here are some useful elements of the startState
-        startPosition = gameState.getPacmanPosition(self.index)
-        food = gameState.getFood()
-        walls = gameState.getWalls()
-        problem = AnyFoodSearchProblem(gameState, self.index)
+	def findPathToClosestDot(self, gameState):
+		"""
+		Returns a path (a list of actions) to the closest dot, starting from
+		gameState.
+		"""
+		# Here are some useful elements of the startState
+		startPosition = gameState.getPacmanPosition(self.index)
+		food = gameState.getFood()
+		walls = gameState.getWalls()
+		problem = AnyFoodSearchProblem(gameState, self.index)
 
 
-        "*** YOUR CODE HERE ***"
-        # util.raiseNotDefined()
-        fringe = util.Queue()
-        visited = []        # List of already visited nodes
-        action_list = []    # List of actions taken to get to the current node
-        total_cost = 0      # Cost to get to the current node
-        initial = problem.getStartState()   # Starting state of the problem
+		"*** YOUR CODE HERE ***"
+		# util.raiseNotDefined()
+		fringe = util.Queue()
+		visited = []        # List of already visited nodes
+		action_list = []    # List of actions taken to get to the current node
+		total_cost = 0      # Cost to get to the current node
+		initial = problem.getStartState()   # Starting state of the problem
 
-        fringe.push((initial, action_list))
+		fringe.push((initial, action_list))
 
-        while fringe: 
-            node, actions = fringe.pop() 
-            if not node in visited:
-                visited.append(node)
-                if problem.isGoalState(node):
-                    return actions
-                successors = problem.getSuccessors(node)
-                for successor in successors:
-                    coordinate, direction, cost = successor
-                    fringe.push((coordinate, actions + [direction]))
+		while fringe:
+			node, actions = fringe.pop()
+			if not node in visited:
+				visited.append(node)
+				if problem.isGoalState(node):
+					return actions
+				successors = problem.getSuccessors(node)
+				for successor in successors:
+					coordinate, direction, cost = successor
+					fringe.push((coordinate, actions + [direction]))
 
-    def getAction(self, state):
-        return self.findPathToClosestDot(state)[0]
+	def getAction(self, state):
+		return self.findPathToClosestDot(state)[0]
 
 class AnyFoodSearchProblem(PositionSearchProblem):
-    """
-    A search problem for finding a path to any food.
+	"""
+	A search problem for finding a path to any food.
 
-    This search problem is just like the PositionSearchProblem, but has a
-    different goal test, which you need to fill in below.  The state space and
-    successor function do not need to be changed.
+	This search problem is just like the PositionSearchProblem, but has a
+	different goal test, which you need to fill in below.  The state space and
+	successor function do not need to be changed.
 
-    The class definition above, AnyFoodSearchProblem(PositionSearchProblem),
-    inherits the methods of the PositionSearchProblem.
+	The class definition above, AnyFoodSearchProblem(PositionSearchProblem),
+	inherits the methods of the PositionSearchProblem.
 
-    You can use this search problem to help you fill in the findPathToClosestDot
-    method.
-    """
+	You can use this search problem to help you fill in the findPathToClosestDot
+	method.
+	"""
 
-    def __init__(self, gameState, agentIndex):
-        "Stores information from the gameState.  You don't need to change this."
-        # Store the food for later reference
-        self.food = gameState.getFood()
+	def __init__(self, gameState, agentIndex):
+		"Stores information from the gameState.  You don't need to change this."
+		# Store the food for later reference
+		self.food = gameState.getFood()
 
-        # Store info for the PositionSearchProblem (no need to change this)
-        self.walls = gameState.getWalls()
-        self.startState = gameState.getPacmanPosition(agentIndex)
-        self.costFn = lambda x: 1
-        self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
+		# Store info for the PositionSearchProblem (no need to change this)
+		self.walls = gameState.getWalls()
+		self.startState = gameState.getPacmanPosition(agentIndex)
+		self.costFn = lambda x: 1
+		self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
 
-    def isGoalState(self, state):
-        """
-        The state is Pacman's position. Fill this in with a goal test that will
-        complete the problem definition.
-        """
-        x,y = state
+	def isGoalState(self, state):
+		"""
+		The state is Pacman's position. Fill this in with a goal test that will
+		complete the problem definition.
+		"""
+		x,y = state
 
-        "*** YOUR CODE HERE ***"
-        # util.raiseNotDefined()
-        return self.food[x][y]
+		"*** YOUR CODE HERE ***"
+		# util.raiseNotDefined()
+		return self.food[x][y]
 
 class QLearningAgent(ReinforcementAgent):
 	"""
@@ -161,13 +161,12 @@ class QLearningAgent(ReinforcementAgent):
 		self.action_values = util.Counter()
 
 	def thisIsIT(self, state):
-		pacmanPosition = state.getPacmanPosition()
+		pacmanPosition = state.getPacmanPosition(self.index)
 		grid = state.data.ToList()
 		height, width = state.data.layout.height, state.data.layout.width
 		new_state = grid.data[max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)][max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)]
 
 		return new_state
-
 
 	def getQValue(self, state, action):
 		"""
@@ -205,7 +204,7 @@ class QLearningAgent(ReinforcementAgent):
 			opt_value = 0.0
 		else:
 			opt_value = max(values)
-		
+
 		for action in self.getLegalActions(state):
 			if(self.action_values[(compressed_state, action)] == opt_value):
 				return action
