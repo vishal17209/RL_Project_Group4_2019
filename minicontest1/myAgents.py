@@ -14,6 +14,7 @@
 from game import Agent
 from searchProblems import PositionSearchProblem
 from learningAgents import ReinforcementAgent
+from pacman import PacmanRules
 
 import random,math
 import util
@@ -210,7 +211,7 @@ class QLearningAgent(ReinforcementAgent):
 			if(self.action_values[(compressed_state, action)] == opt_value):
 				return action
 
-	def getAction(self, state):
+	def getAction(self, state, agentIndex):
 		"""
 		  Compute the action to take in the current state.  With
 		  probability self.epsilon, we should take a random action and
@@ -223,7 +224,7 @@ class QLearningAgent(ReinforcementAgent):
 		"""
 		# Pick Action
 		compressed_state = str(self.thisIsIT(state))
-		legalActions = self.getLegalActions(state)
+		legalActions = PacmanRules.getLegalActions(state)
 		action = None
 		"*** YOUR CODE HERE ***"
 		if(len(legalActions) != 0):
@@ -281,4 +282,4 @@ class MyAgent(QLearningAgent):
 		"""
 		action = QLearningAgent.getAction(self,state)
 		self.doAction(state,action)
-		return action
+		return acti
