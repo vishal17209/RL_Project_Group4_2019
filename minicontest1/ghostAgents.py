@@ -69,6 +69,7 @@ class DirectionalGhost(GhostAgent):
         actionVectors = [Actions.directionToVector(
             a, speed) for a in legalActions]
         newPositions = [(pos[0]+a[0], pos[1]+a[1]) for a in actionVectors]
+
         num_pacman_agents = state.getNumPacmanAgents()
         scores = list()
         for i in range(num_pacman_agents):
@@ -90,6 +91,7 @@ class DirectionalGhost(GhostAgent):
 
         scores.sort()
         bestScore, bestProb, distancesToPacman = scores[0]
+
         bestActions = [action for action, distance in zip(
             legalActions, distancesToPacman) if distance == bestScore]
 
