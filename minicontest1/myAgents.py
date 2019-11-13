@@ -167,7 +167,7 @@ class QLearningAgent(ReinforcementAgent):
 		pacmanPosition = state.getPacmanPosition(self.index)
 		grid = state.data.ToList()
 		height, width = state.data.layout.height, state.data.layout.width
-		new_state = grid.data[max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)][max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)]
+		new_state = grid.data[max(0, pacmanPosition[0]-5):min(height-1, pacmanPosition[0]+5)][max(0, pacmanPosition[1]-5):min(width-1, pacmanPosition[1]+5)]
 
 		return new_state
 
