@@ -389,6 +389,7 @@ class PacmanRules:
                 state.data.scoreChange += 500
                 state.data._win = True
         # Eat capsule
+        # EDIT HERE
         if( position in state.getCapsules() ):
             state.data.capsules.remove( position )
             state.data._capsuleEaten = position
@@ -690,7 +691,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
         game.run()
         if not beQuiet: games.append(game)
 
-        if record:
+        if record and i >= numTraining:
             import time, pickle
             fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
             f = open(fname, 'wb')

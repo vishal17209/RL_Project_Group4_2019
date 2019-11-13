@@ -69,29 +69,17 @@ class DirectionalGhost(GhostAgent):
         actionVectors = [Actions.directionToVector(
             a, speed) for a in legalActions]
         newPositions = [(pos[0]+a[0], pos[1]+a[1]) for a in actionVectors]
+        pacmanPosition = state.getPacmanPosition()
 
-        num_pacman_agents = state.getNumPacmanAgents()
-        scores = list()
-        for i in range(num_pacman_agents):
-
-            pacmanPosition = state.getPacmanPosition(i)
-
-            # Select best actions given the state
-            distancesToPacman = [manhattanDistance(
-                pos, pacmanPosition) for pos in newPositions]
-            if isScared:
-
-                bestScore = max(distancesToPacman)
-                bestProb = self.prob_scaredFlee
-            else:
-                bestScore = min(distancesToPacman)
-                bestProb = self.prob_attack
-
-            scores.append((bestScore, bestProb, distancesToPacman))
-
-        scores.sort()
-        bestScore, bestProb, distancesToPacman = scores[0]
-
+        # Select best actions given the state
+        distancesToPacman = [manhattanDistance(
+            pos, pacmanPosition) for pos in newPositions]
+        if isScared:
+            bestScore = max(distancesToPacman)
+            bestProb = self.prob_scaredFlee
+        else:
+            bestScore = min(distancesToPacman)
+            bestProb = self.prob_attack
         bestActions = [action for action, distance in zip(
             legalActions, distancesToPacman) if distance == bestScore]
 
