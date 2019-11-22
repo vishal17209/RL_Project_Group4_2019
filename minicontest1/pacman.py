@@ -279,7 +279,7 @@ class GameState:
 ############################################################################
 
 SCARED_TIME = 40    # Moves ghosts are scared
-COLLISION_TOLERANCE = 0.7 # How close ghosts must be to Pacman to kill
+COLLISION_TOLERANCE = 0.0 # How close ghosts must be to Pacman to kill #whoami
 TIME_PENALTY = 1 # Number of points lost each round
 
 class ClassicGameRules:
@@ -359,6 +359,7 @@ class PacmanRules:
         """
         legal = PacmanRules.getLegalActions( state, agentIndex )
         if action not in legal:
+            print(state);print(action) #whoami
             raise Exception("Illegal action " + str(action))
 
         pacmanState = state.data.agentStates[agentIndex]
@@ -379,7 +380,7 @@ class PacmanRules:
         x,y = position
         # Eat food
         if state.data.food[x][y]:
-            state.data.scoreChange += 10
+            state.data.scoreChange += 100
             state.data.food = state.data.food.copy()
             state.data.food[x][y] = False
             state.data._foodEaten = position
@@ -401,7 +402,7 @@ class GhostRules:
     """
     These functions dictate how ghosts interact with their environment.
     """
-    GHOST_SPEED=1.0
+    GHOST_SPEED=1 #whoami
     def getLegalActions( state, ghostIndex ):
         """
         Ghosts cannot stop, and cannot turn around unless they
@@ -460,17 +461,18 @@ class GhostRules:
             # Added for first-person
             state.data._eaten[agentIndex] = True
         else:
-            print(state.data.deathCount) #whoami
+            # print(state.data.deathCount) #whoami
             if not state.data._win:
-                state.data.scoreChange -= 10 #whoami
-                # state.data._lose = False#True #whoami
+                state.data.scoreChange -= 2 #whoami
                 state.data.deathCount+=1
-                if(state.data.deathCount>=2):
+                if(state.data.deathCount>=2): #adjust death count for multiagent pacman #whoami 
                     state.data._lose=True
                 #whoami
+    
     collide = staticmethod( collide )
 
     def canKill( pacmanPosition, ghostPosition ):
+        print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
         return manhattanDistance( ghostPosition, pacmanPosition ) <= COLLISION_TOLERANCE
     canKill = staticmethod( canKill )
 

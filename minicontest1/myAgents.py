@@ -20,13 +20,14 @@ import random,math
 import util
 import time
 import search
+import copy
 
 """
 IMPORTANT
 `agent` defines which agent you will use. By default, it is set to ClosestDotAgent,
 but when you're ready to test your own agent, replace it with MyAgent
 """
-def createAgents(num_pacmen, agent='MyAgent'):
+def createAgents(num_pacmen, agent='QLearningAgent'):
 	return [eval(agent)(index=i) for i in range(num_pacmen)]
 
 # class MyAgent(Agent):
@@ -155,20 +156,30 @@ class QLearningAgent(ReinforcementAgent):
 		- self.getLegalActions(state)
 		  which returns legal actions for a state
 	"""
-	def __init__(self, **args):
+	def __init__(self, epsilon=1,gamma=0.9,alpha=1, numTraining=0, **args):
+
 		"You can initialize Q-values here..."
+		args['epsilon'] = epsilon
+		args['gamma'] = gamma
+		args['alpha'] = alpha
+		args['numTraining'] = numTraining
 		ReinforcementAgent.__init__(self, **args)
+		print(self.epsilon, self.alpha) #whoami
 
 		"*** YOUR CODE HERE ***"
 		self.action_values = util.Counter()
 
 	def thisIsIT(self, state):
 		pacmanPosition = state.getPacmanPosition(self.index)
-		grid = state.data.ToList()
-		height, width = state.data.layout.height, state.data.layout.width
-		new_state = grid.data[max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)][max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)]
-
-		return new_state
+		grid = str(state.data.ToList())
+		print("state",grid) #whoami
+		grid=tuple(grid.split("\n"))
+		height, width = state.data.layout.height, state.data.layout.width #max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)
+		print(pacmanPosition,height)
+		new_state = grid #pacmanPosition #grid[height-1-pacmanPosition[1]][pacmanPosition[0]]  #max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)
+		print("new_state", new_state) #whoami
+		return grid
+		# return state.getPacmanState( self.index )
 
 	def getQValue(self, state, action):
 		"""
@@ -177,6 +188,8 @@ class QLearningAgent(ReinforcementAgent):
 		  or the Q node value otherwise
 		"""
 		"*** YOUR CODE HERE ***"
+		if((state,action) not in action_values):
+			return 0.0 #whoami
 		self.action_values[(state, action)]
 
 	def computeValueFromQValues(self, state, compressed_state):
@@ -223,15 +236,19 @@ class QLearningAgent(ReinforcementAgent):
 		  HINT: To pick randomly from a list, use random.choice(list)
 		"""
 		# Pick Action
-		compressed_state = str(self.thisIsIT(state))
-		legalActions = self.getLegalActions(state)
+		compressed_state = self.thisIsIT(state.deepCopy())
+		legActions = self.getLegalActions(state)
+		print(legActions)
 		action = None
 		"*** YOUR CODE HERE ***"
-		if(len(legalActions) != 0):
+		print(self.numTraining,"training",self.epsilon, "epsilon") #whoami
+		if(len(legActions) != 0):
 			if(random.random() < self.epsilon):
-				return random.choice(legalActions)
-			return self.computeActionFromQValues(state, compressed_state)
-		return action
+				action = random.choice(legActions)
+			else:
+				action = self.computeActionFromQValues(state, compressed_state)
+		self.doAction(state.deepCopy(),action)#whoami
+		return action #whoami
 
 	def update(self, state, action, nextState, reward):
 		"""
@@ -243,43 +260,48 @@ class QLearningAgent(ReinforcementAgent):
 		  it will be called on your behalf
 		"""
 		"*** YOUR CODE HERE ***"
-		compressed_state = str(self.thisIsIT(state))
-		compressed_nextState = str(self.thisIsIT(nextState))
+		print(self.numTraining,"training",self.alpha, "alpha",self.discount, "discount") #whoami
+		compressed_state = self.thisIsIT(state.deepCopy())
+		compressed_nextState = self.thisIsIT(nextState.deepCopy())
+		print(reward,"reward", (compressed_state, action)) #whoami
 		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
 
-	# def getPolicy(self, state):
-	# 	return self.computeActionFromQValues(state)
+	#whoami ignore them for now
+	def getPolicy(self, state):
+		return self.computeActionFromQValues(state)
 
-	# def getValue(self, state):
-	# 	return self.computeValueFromQValues(state)
+	def getValue(self, state):
+		return self.computeValueFromQValues(state)
 
 
-class MyAgent(QLearningAgent):
-	"Exactly the same as QLearningAgent, but with different default parameters"
 
-	def __init__(self, epsilon=0.05,gamma=0.8,alpha=0.2, numTraining=0, **args):
-		"""
-		These default parameters can be changed from the pacman.py command line.
-		For example, to change the exploration rate, try:
-			python pacman.py -p PacmanQLearningAgent -a epsilon=0.1
 
-		alpha    - learning rate
-		epsilon  - exploration rate
-		gamma    - discount factor
-		numTraining - number of training episodes, i.e. no learning after these many episodes
-		"""
-		args['epsilon'] = epsilon
-		args['gamma'] = gamma
-		args['alpha'] = alpha
-		args['numTraining'] = numTraining
-		QLearningAgent.__init__(self, **args)
 
-	def getAction(self, state):
-		"""
-		Simply calls the getAction method of QLearningAgent and then
-		informs parent of action for Pacman.  Do not change or remove this
-		method.
-		"""
-		action = QLearningAgent.getAction(self,state)
-		self.doAction(state,action)
-		return action
+
+
+
+
+# class MyAgent(QLearningAgent):
+# 	"Exactly the same as QLearningAgent, but with different default parameters"
+
+# 	def __init__(self, epsilon=0.5,gamma=0.9,alpha=0.3, numTraining=0, **args):
+# 		"""
+# 		These default parameters can be changed from the pacman.py command line.
+# 		For example, to change the exploration rate, try:
+# 			python pacman.py -p PacmanQLearningAgent -a epsilon=0.1
+
+# 		alpha    - learning rate
+# 		epsilon  - exploration rate
+# 		gamma    - discount factor
+# 		numTraining - number of training episodes, i.e. no learning after these many episodes
+# 		"""
+		
+# 	def getAction(self, state):
+# 		"""
+# 		Simply calls the getAction method of QLearningAgent and then
+# 		informs parent of action for Pacman.  Do not change or remove this
+# 		method.
+# 		"""
+# 		action = QLearningAgent.getAction(self,state)
+# 		self.doAction(state,action)
+# 		return action
