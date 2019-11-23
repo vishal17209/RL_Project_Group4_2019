@@ -360,7 +360,7 @@ class PacmanRules:
         legal = PacmanRules.getLegalActions( state, agentIndex )
         if action not in legal:
             print(state);print(action) #whoami
-            raise Exception("Illegal action " + str(action))
+            raise Exception("Illegal action " +str(agentIndex)+" "+ str(action) +" "+str(state) )
 
         pacmanState = state.data.agentStates[agentIndex]
 
@@ -472,7 +472,7 @@ class GhostRules:
     collide = staticmethod( collide )
 
     def canKill( pacmanPosition, ghostPosition ):
-        # print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
+        print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
         return manhattanDistance( ghostPosition, pacmanPosition ) <= COLLISION_TOLERANCE
     canKill = staticmethod( canKill )
 
@@ -692,7 +692,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
         game.run()
         if not beQuiet: games.append(game)
 
-        if record and not beQuiet:
+        if record and i >= numGames-10:
             import time, pickle
             fname = ('./records/recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
             f = open(fname, 'wb')
