@@ -172,20 +172,24 @@ class QLearningAgent(ReinforcementAgent):
 	def thisIsIT(self, state):
 		pacmanPosition = state.getPacmanPosition(self.index)
 		grid = str(state.data.ToList())
-		# print("state",grid) #whoami
-		grid=tuple(grid.split("\n"))
-		height, width = state.data.layout.height, state.data.layout.width   #pacmanPosition[0]   #height-1-pacmanPosition[1]
-		new_state = grid[max(0, (height-1-pacmanPosition[1])-2):min(len(grid)-1, (height-1-pacmanPosition[1])+2)][max(0, pacmanPosition[0]-2):min(len(grid[0])-1, pacmanPosition[0]+2)]
+		grid=grid.split("\n")
+		height, width = state.data.layout.height, state.data.layout.width   
+
+		#for vision = (2vision+1)x(2vision+1) #whoami
+		vision=1 
+		new_state = grid[max(0, (height-1-pacmanPosition[1])-vision):min(height, (height-pacmanPosition[1])+vision)]
+		for lul in range(len(new_state)):
+			new_state[lul]=new_state[lul][max(0, pacmanPosition[0]-vision):min(len(grid[0]), 1+pacmanPosition[0]+vision)]
 		new_state="\n".join(new_state)
-		# print("new_state", new_state) #whoami
+		
 		return new_state
-		# return state.getPacmanState( self.index )
-		# return pacmanPosition
+		# return state.getPacmanState( self.index ) #whoami
+		# return pacmanPosition #whoami
 
 	def getQValue(self, state, action):
 		"""
 		  Returns Q(state,action)
-		  Should return 0.0 if we have never seen a state
+		  Should return 0.0 if we have never seen a statestate.getPacmanPosition(self.index)
 		  or the Q node value otherwise
 		"""
 		"*** YOUR CODE HERE ***"
@@ -238,6 +242,19 @@ class QLearningAgent(ReinforcementAgent):
 		"""
 		# Pick Action
 		compressed_state = self.thisIsIT(state.deepCopy())
+
+		#whoami for testing compressed state formation
+		# if(self.index==0):
+		# 	height, width = state.data.layout.height, state.data.layout.width
+		# 	grid = str(state.data.ToList())
+		# 	print("state",grid) #whoami
+		# 	pacmanPosition=state.getPacmanPosition(self.index)
+		# 	print(pacmanPosition)
+		# 	print("row clip",max(0, (height-1-pacmanPosition[1])-1),min(height, (height-pacmanPosition[1])+1))
+		# 	print("column clip",max(0, pacmanPosition[0]-1),min(len(grid[0]), pacmanPosition[0]+2),grid[0])
+		# 	print("new_state", self.index) 
+		# 	print(compressed_state) 
+
 		legActions = self.getLegalActions(state)
 		# print(legActions)
 		action = None
@@ -251,10 +268,13 @@ class QLearningAgent(ReinforcementAgent):
 
 		self.doAction(state.deepCopy(),action)#whoami
 
-		f = open("actions.txt", "a")
-		f.write("get action\n")
-		f.write(str(compressed_state)+"\n");f.write(str(legActions)+" "+str(action)+"\n")
-		f.close()
+		if(self.index==0): #being recorded only for first pacman right now
+			f = open("actions.txt", "a")
+			f.write("get action\n")
+			f.write(str(compressed_state)+"\n");f.write(str(legActions)+" "+str(action)+"\n")
+			f.close()
+
+		# assert("P" in  compressed_state), compressed_state #whoami
 
 		return action #whoami
 
@@ -271,14 +291,23 @@ class QLearningAgent(ReinforcementAgent):
 		# print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
 		compressed_state = self.thisIsIT(state.deepCopy())
 		compressed_nextState = self.thisIsIT(nextState.deepCopy())
-		#whoami
-		f = open("actions.txt", "a")
-		f.write("updation\n")
-		f.write(str(compressed_state)+"\n");
-		f.write(str(action)+"\n")
-		f.write(str(compressed_nextState)+"\n")
-		f.write(str(reward)+" "+str(self.discount*self.computeValueFromQValues(nextState, compressed_nextState))+" "+str(self.action_values[(compressed_state, action)])+" "+str(self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)]))+"\n")
-		f.close()#whoami
+
+		if(self.index==0): #being recorded only for first pacman right now
+			f = open("actions.txt", "a")
+			f.write("updation\n")
+			f.write("state\n")
+			f.write(str(state.data.ToList())+"\n")
+			f.write("compstate\n")
+			f.write(str(compressed_state)+"\n");
+			f.write(str(action)+"\n")
+			f.write("nextstate\n")
+			f.write(str(nextState.data.ToList())+"\n")
+			f.write("compnextstate\n")
+			f.write(str(compressed_nextState)+"\n")
+			f.write(str(reward)+" "+str(self.discount*self.computeValueFromQValues(nextState, compressed_nextState))+" "+str(self.action_values[(compressed_state, action)])+" "+str(self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)]))+"\n")
+			f.close()#whoami
+
+		# assert("P" in compressed_nextState and "P" in compressed_state), compressed_state+"\n\n"+compressed_nextState+"\n"+str(nextState.getLegalActions(self.index)) #whoami
 
 		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
 
@@ -324,4 +353,9 @@ class QLearningAgent(ReinforcementAgent):
 # 		return action
 
 
+
+
 #state generalization required, reward incentivization required
+
+#in the state(valid actions remain intact), but the description priority remains:
+#power up overlaps all, ghost overlaps pacman and pacman overlaps scared ghost 

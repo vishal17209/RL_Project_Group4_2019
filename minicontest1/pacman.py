@@ -113,7 +113,7 @@ class GameState:
         # TODO make sure this is right -> want to have it just decrement by time once
         # Or maybe decrement for all
         if agentIndex < self.data.numPacmanAgents:
-            state.data.scoreChange += - 1.3 * TIME_PENALTY # Penalty for waiting around
+            state.data.scoreChange += - 0.4 * TIME_PENALTY # Penalty for waiting around
         else:
             GhostRules.decrementTimer( state.data.agentStates[agentIndex] )
 
@@ -380,7 +380,7 @@ class PacmanRules:
         x,y = position
         # Eat food
         if state.data.food[x][y]:
-            state.data.scoreChange += 100
+            state.data.scoreChange += 10
             state.data.food = state.data.food.copy()
             state.data.food[x][y] = False
             state.data._foodEaten = position
@@ -391,6 +391,7 @@ class PacmanRules:
                 state.data._win = True
         # Eat capsule
         if( position in state.getCapsules() ):
+            state.data.scoreChange += 20 #reward if any to be given for the power-up(apart from that it scares all) #whoami
             state.data.capsules.remove( position )
             state.data._capsuleEaten = position
             # Reset all ghosts' scared timers
@@ -426,7 +427,7 @@ class GhostRules:
 
         ghostState = state.data.agentStates[ghostIndex]
         speed = GhostRules.GHOST_SPEED
-        if ghostState.scaredTimer > 0: speed /= 2.0
+        # if ghostState.scaredTimer > 0: speed /= 2.0 #whoami
         vector = Actions.directionToVector( action, speed )
         ghostState.configuration = ghostState.configuration.generateSuccessor( vector )
     applyAction = staticmethod( applyAction )

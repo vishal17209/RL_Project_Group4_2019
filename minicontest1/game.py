@@ -487,7 +487,10 @@ class GameStateData:
             if agentState.isPacman:
                 map[x][y] = "P" #self._pacStr(agent_dir) #whoami
             else:
-                map[x][y] = self._ghostStr(agent_dir)
+                if(agentState.scaredTimer>0): #different visibility of 'A' for scared ghosts #whoami
+                    map[x][y] = "A" 
+                else:
+                    map[x][y] = self._ghostStr(agent_dir)
 
         for x, y in self.capsules:
             map[x][y] = 'o'
