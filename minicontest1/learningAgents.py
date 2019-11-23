@@ -141,6 +141,11 @@ class ReinforcementAgent(ValueEstimationAgent):
         self.lastAction = None
         self.episodeRewards = 0.0
 
+        f = open("actions.txt", "a")
+        f.write("train"+str(self.episodesSoFar)+":\n")
+        f.close()#whoami
+
+
     def stopEpisode(self):
         """
           Called by environment when episode is done

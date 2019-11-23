@@ -113,7 +113,7 @@ class GameState:
         # TODO make sure this is right -> want to have it just decrement by time once
         # Or maybe decrement for all
         if agentIndex < self.data.numPacmanAgents:
-            state.data.scoreChange += - 0.4 * TIME_PENALTY # Penalty for waiting around
+            state.data.scoreChange += - 1.3 * TIME_PENALTY # Penalty for waiting around
         else:
             GhostRules.decrementTimer( state.data.agentStates[agentIndex] )
 
@@ -463,7 +463,7 @@ class GhostRules:
         else:
             # print(state.data.deathCount) #whoami
             if not state.data._win:
-                state.data.scoreChange -= 2 #whoami
+                state.data.scoreChange -= 500 #whoami
                 state.data.deathCount+=1
                 if(state.data.deathCount>=2): #adjust death count for multiagent pacman #whoami 
                     state.data._lose=True

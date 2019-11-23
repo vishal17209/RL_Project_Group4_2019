@@ -156,7 +156,7 @@ class QLearningAgent(ReinforcementAgent):
 		- self.getLegalActions(state)
 		  which returns legal actions for a state
 	"""
-	def __init__(self, epsilon=1,gamma=0.9,alpha=1, numTraining=0, **args):
+	def __init__(self, epsilon=0.3,gamma=0.9,alpha=0.2, numTraining=0, **args):
 
 		"You can initialize Q-values here..."
 		args['epsilon'] = epsilon
@@ -174,12 +174,13 @@ class QLearningAgent(ReinforcementAgent):
 		grid = str(state.data.ToList())
 		print("state",grid) #whoami
 		grid=tuple(grid.split("\n"))
-		height, width = state.data.layout.height, state.data.layout.width #max(0, pacmanPosition[0]-3):min(height-1, pacmanPosition[0]+3)
-		print(pacmanPosition,height)
-		new_state = grid #pacmanPosition #grid[height-1-pacmanPosition[1]][pacmanPosition[0]]  #max(0, pacmanPosition[1]-3):min(width-1, pacmanPosition[1]+3)
+		height, width = state.data.layout.height, state.data.layout.width   #pacmanPosition[0]   #height-1-pacmanPosition[1]
+		new_state = grid[max(0, (height-1-pacmanPosition[1])-2):min(len(grid)-1, (height-1-pacmanPosition[1])+2)][max(0, pacmanPosition[0]-2):min(len(grid[0])-1, pacmanPosition[0]+2)]
+		new_state="\n".join(new_state)
 		print("new_state", new_state) #whoami
-		return grid
+		return new_state
 		# return state.getPacmanState( self.index )
+		# return pacmanPosition
 
 	def getQValue(self, state, action):
 		"""
@@ -248,6 +249,12 @@ class QLearningAgent(ReinforcementAgent):
 			else:
 				action = self.computeActionFromQValues(state, compressed_state)
 		self.doAction(state.deepCopy(),action)#whoami
+		
+		f = open("actions.txt", "a")
+		f.write("get action\n")
+		f.write(str(compressed_state)+"\n");f.write(str(legActions)+" "+str(action)+"\n")
+		f.close()
+		
 		return action #whoami
 
 	def update(self, state, action, nextState, reward):
@@ -260,11 +267,20 @@ class QLearningAgent(ReinforcementAgent):
 		  it will be called on your behalf
 		"""
 		"*** YOUR CODE HERE ***"
-		print(self.numTraining,"training",self.alpha, "alpha",self.discount, "discount") #whoami
+		print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
 		compressed_state = self.thisIsIT(state.deepCopy())
 		compressed_nextState = self.thisIsIT(nextState.deepCopy())
-		print(reward,"reward", (compressed_state, action)) #whoami
+		#whoami
+		f = open("actions.txt", "a")
+		f.write("updation\n")
+		f.write(str(compressed_state)+"\n");
+		f.write(str(action)+"\n")
+		f.write(str(compressed_nextState)+"\n")
+		f.write(str(reward)+" "+str(self.discount*self.computeValueFromQValues(nextState, compressed_nextState))+" "+str(self.action_values[(compressed_state, action)])+" "+str(self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)]))+"\n")
+		f.close()#whoami
+
 		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
+		
 
 	#whoami ignore them for now
 	def getPolicy(self, state):
@@ -305,3 +321,6 @@ class QLearningAgent(ReinforcementAgent):
 # 		action = QLearningAgent.getAction(self,state)
 # 		self.doAction(state,action)
 # 		return action
+
+
+#state generalization required, reward incentivization required
