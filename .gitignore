@@ -2,3 +2,4 @@ minicontest1/__pycache__/
 reinforcement/__pycache__/
 *.pyc
 */__pycache__/*
+minicontest1/action.txt
