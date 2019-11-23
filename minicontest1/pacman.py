@@ -465,14 +465,14 @@ class GhostRules:
             if not state.data._win:
                 state.data.scoreChange -= 500 #whoami
                 state.data.deathCount+=1
-                if(state.data.deathCount>=2): #adjust death count for multiagent pacman #whoami 
+                if(state.data.deathCount>=2): #adjust death count for multiagent pacman #whoami
                     state.data._lose=True
                 #whoami
-    
+
     collide = staticmethod( collide )
 
     def canKill( pacmanPosition, ghostPosition ):
-        print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
+        # print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
         return manhattanDistance( ghostPosition, pacmanPosition ) <= COLLISION_TOLERANCE
     canKill = staticmethod( canKill )
 
@@ -657,7 +657,7 @@ def replayGame( layout, actions, display ):
     import pacmanAgents, ghostAgents
     rules = ClassicGameRules()
     agents = [pacmanAgents.GreedyAgent()] + [ghostAgents.RandomGhost(i+1) for i in range(layout.getNumGhosts())]
-    game = rules.newGame( layout, agents[0], agents[1:], display )
+    game = rules.newGame( layout, agents, agents[1:], display )
     state = game.state
     display.initialize(state.data)
 
@@ -692,9 +692,9 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
         game.run()
         if not beQuiet: games.append(game)
 
-        if record:
+        if record and not beQuiet:
             import time, pickle
-            fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
+            fname = ('./records/recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
             f = open(fname, 'wb')
             components = {'layout': layout, 'actions': game.moveHistory}
             pickle.dump(components, f)
