@@ -156,7 +156,7 @@ class QLearningAgent(ReinforcementAgent):
 		- self.getLegalActions(state)
 		  which returns legal actions for a state
 	"""
-	def __init__(self, epsilon=0.3,gamma=0.9,alpha=0.2, numTraining=0, **args):
+	def __init__(self, epsilon=0.3,gamma=0.9,alpha=1, numTraining=100, **args):
 
 		"You can initialize Q-values here..."
 		args['epsilon'] = epsilon
@@ -164,7 +164,7 @@ class QLearningAgent(ReinforcementAgent):
 		args['alpha'] = alpha
 		args['numTraining'] = numTraining
 		ReinforcementAgent.__init__(self, **args)
-		print(self.epsilon, self.alpha) #whoami
+		print(self.epsilon, self.alpha,self.numTraining) #whoami
 
 		"*** YOUR CODE HERE ***"
 		self.action_values = util.Counter()
@@ -242,7 +242,7 @@ class QLearningAgent(ReinforcementAgent):
 		print(legActions)
 		action = None
 		"*** YOUR CODE HERE ***"
-		print(self.numTraining,"training",self.epsilon, "epsilon") #whoami
+		print(self.numTraining - self.episodesSoFar,"trainingleft",self.epsilon, "epsilon") #whoami
 		if(len(legActions) != 0):
 			if(random.random() < self.epsilon):
 				action = random.choice(legActions)
