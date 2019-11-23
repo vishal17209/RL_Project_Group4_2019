@@ -176,7 +176,7 @@ class QLearningAgent(ReinforcementAgent):
 		height, width = state.data.layout.height, state.data.layout.width   
 
 		#for vision = (2vision+1)x(2vision+1) #whoami
-		vision=1 
+		vision=2
 		new_state = grid[max(0, (height-1-pacmanPosition[1])-vision):min(height, (height-pacmanPosition[1])+vision)]
 		for lul in range(len(new_state)):
 			new_state[lul]=new_state[lul][max(0, pacmanPosition[0]-vision):min(len(grid[0]), 1+pacmanPosition[0]+vision)]
