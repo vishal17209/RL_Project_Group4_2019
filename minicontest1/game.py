@@ -787,7 +787,7 @@ class Game:
             ###self.display.update( self.state.makeObservation(idx).data )
 
             # Allow for game specific conditions (winning, losing, etc.)
-            # print("death counter now ",self.state.data.deathCount)#whoami
+            # print("death counter now ",self.state.data.deathCount, agentIndex)#whoami
             self.rules.process(self.state, self)
 
             # print("step ",maihoonnaa,"...",agentIndex) #whoami

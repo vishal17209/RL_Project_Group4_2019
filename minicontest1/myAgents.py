@@ -260,6 +260,7 @@ class QLearningAgent(ReinforcementAgent):
 		action = None
 		"*** YOUR CODE HERE ***"
 		# print(self.numTraining - self.episodesSoFar,"trainingleft",self.epsilon, "epsilon") #whoami
+		
 		if(len(legActions) != 0):
 			if(random.random() < self.epsilon):
 				action = random.choice(legActions)
@@ -289,6 +290,7 @@ class QLearningAgent(ReinforcementAgent):
 		"""
 		"*** YOUR CODE HERE ***"
 		# print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
+		
 		compressed_state = self.thisIsIT(state.deepCopy())
 		compressed_nextState = self.thisIsIT(nextState.deepCopy())
 

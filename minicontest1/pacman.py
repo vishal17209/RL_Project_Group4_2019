@@ -440,14 +440,19 @@ class GhostRules:
     decrementTimer = staticmethod( decrementTimer )
 
     def checkDeath(state, agentIndex, numPacmanAgents, numGhostAgents):
-        pacmanPositions = state.getPacmanPositions()
+        #pacmanPositions = state.getPacmanPositions() #whoami
         if agentIndex < numPacmanAgents: # Pacman just moved; Anyone can kill him
+            pacmanPosition = state.getPacmanPosition( agentIndex ) #whoami
             for index in range( numPacmanAgents, len( state.data.agentStates ) ):
                 ghostState = state.data.agentStates[index]
                 ghostPosition = ghostState.configuration.getPosition()
-                if any([GhostRules.canKill(pos, ghostPosition) for pos in pacmanPositions]):
+                #whoami
+                if (GhostRules.canKill(pacmanPosition, ghostPosition)):
                     GhostRules.collide( state, ghostState, index )
+                # if any([GhostRules.canKill(pos, ghostPosition) for pos in pacmanPositions]):
+                #     GhostRules.collide( state, ghostState, index )
         else:
+            pacmanPositions = state.getPacmanPositions() #whoami
             ghostState = state.data.agentStates[agentIndex]
             ghostPosition = ghostState.configuration.getPosition()
             if any([GhostRules.canKill(pos, ghostPosition ) for pos in pacmanPositions]):
@@ -658,7 +663,7 @@ def replayGame( layout, actions, display ):
     import pacmanAgents, ghostAgents
     rules = ClassicGameRules()
     agents = [pacmanAgents.GreedyAgent() for i in range(layout.getNumPacmen())] + [ghostAgents.RandomGhost(i+1) for i in range(layout.getNumGhosts())]
-    game = rules.newGame( layout, agents, agents[layout.getNumPacmen():], display )
+    game = rules.newGame( layout, agents[:layout.getNumPacmen()], agents[layout.getNumPacmen():], display )
     state = game.state
     display.initialize(state.data)
 
