@@ -248,6 +248,7 @@ class QLearningAgent(ReinforcementAgent):
 				action = random.choice(legActions)
 			else:
 				action = self.computeActionFromQValues(state, compressed_state)
+		
 		self.doAction(state.deepCopy(),action)#whoami
 		
 		f = open("actions.txt", "a")

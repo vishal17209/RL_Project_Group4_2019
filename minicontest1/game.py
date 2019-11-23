@@ -748,6 +748,9 @@ class Game:
                 # #     continue
                 # move_time = time.time() - start_time
                 action = agent.getAction(self.state.deepCopy())
+                assert(action in self.state.getLegalActions(agentIndex)), str(self.state) + " "+ str(self.state.getLegalActions(agentIndex)) +" "+str(action) +" " + str(agentIndex)
+                #whoami
+
             self.unmute()
 
             self.state.data.score += 0 #whoami max(0,-1 * SCALING_FACTOR)

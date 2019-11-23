@@ -360,7 +360,7 @@ class PacmanRules:
         legal = PacmanRules.getLegalActions( state, agentIndex )
         if action not in legal:
             print(state);print(action) #whoami
-            raise Exception("Illegal action " + str(action))
+            raise Exception("Illegal action " +str(agentIndex)+" "+ str(action) +" "+str(state) )
 
         pacmanState = state.data.agentStates[agentIndex]
 
