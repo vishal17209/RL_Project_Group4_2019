@@ -141,9 +141,10 @@ class ReinforcementAgent(ValueEstimationAgent):
         self.lastAction = None
         self.episodeRewards = 0.0
 
-        f = open("actions.txt", "a")
-        f.write("train"+str(self.episodesSoFar)+":\n")
-        f.close()#whoami
+        if(self.index==0): #being recorded only for first pacman right now
+            f = open("actions.txt", "a")
+            f.write("train"+str(self.episodesSoFar)+":\n")
+            f.close()#whoami
 
 
     def stopEpisode(self):
