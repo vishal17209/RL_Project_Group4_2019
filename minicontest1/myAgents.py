@@ -20,13 +20,14 @@ import random,math
 import util
 import time
 import search
+import copy
 
 """
 IMPORTANT
 `agent` defines which agent you will use. By default, it is set to ClosestDotAgent,
 but when you're ready to test your own agent, replace it with MyAgent
 """
-def createAgents(num_pacmen, agent='MyAgent'):
+def createAgents(num_pacmen, agent='QLearningAgent'):
 	return [eval(agent)(index=i) for i in range(num_pacmen)]
 
 # class MyAgent(Agent):
@@ -155,21 +156,31 @@ class QLearningAgent(ReinforcementAgent):
 		- self.getLegalActions(state)
 		  which returns legal actions for a state
 	"""
-	def __init__(self, **args):
+	def __init__(self, epsilon=0.3,gamma=0.9,alpha=1, numTraining=100, **args):
+
 		"You can initialize Q-values here..."
+		args['epsilon'] = epsilon
+		args['gamma'] = gamma
+		args['alpha'] = alpha
+		args['numTraining'] = numTraining
 		ReinforcementAgent.__init__(self, **args)
+		print(self.epsilon, self.alpha,self.numTraining) #whoami
 
 		"*** YOUR CODE HERE ***"
 		self.action_values = util.Counter()
 
 	def thisIsIT(self, state):
-		# print("Agent Index: ", self.index)
 		pacmanPosition = state.getPacmanPosition(self.index)
-		grid = state.data.ToList()
-		height, width = state.data.layout.height, state.data.layout.width
-		new_state = grid.data[max(0, pacmanPosition[0]-5):min(height-1, pacmanPosition[0]+5)][max(0, pacmanPosition[1]-5):min(width-1, pacmanPosition[1]+5)]
-
+		grid = str(state.data.ToList())
+		print("state",grid) #whoami
+		grid=tuple(grid.split("\n"))
+		height, width = state.data.layout.height, state.data.layout.width   #pacmanPosition[0]   #height-1-pacmanPosition[1]
+		new_state = grid[max(0, (height-1-pacmanPosition[1])-2):min(len(grid)-1, (height-1-pacmanPosition[1])+2)][max(0, pacmanPosition[0]-2):min(len(grid[0])-1, pacmanPosition[0]+2)]
+		new_state="\n".join(new_state)
+		print("new_state", new_state) #whoami
 		return new_state
+		# return state.getPacmanState( self.index )
+		# return pacmanPosition
 
 	def getQValue(self, state, action):
 		"""
@@ -178,6 +189,8 @@ class QLearningAgent(ReinforcementAgent):
 		  or the Q node value otherwise
 		"""
 		"*** YOUR CODE HERE ***"
+		if((state,action) not in action_values):
+			return 0.0 #whoami
 		self.action_values[(state, action)]
 
 	def computeValueFromQValues(self, state, compressed_state):
@@ -188,7 +201,7 @@ class QLearningAgent(ReinforcementAgent):
 		  terminal state, you should return a value of 0.0.
 		"""
 		"*** YOUR CODE HERE ***"
-		values = [self.action_values[(compressed_state, action)] for action in PacmanRules.getLegalActions(state, self.index)]
+		values = [self.action_values[(compressed_state, action)] for action in self.getLegalActions(state)]
 		if(len(values) == 0):
 			return 0.0
 		else:
@@ -201,15 +214,14 @@ class QLearningAgent(ReinforcementAgent):
 		  you should return None.
 		"""
 		"*** YOUR CODE HERE ***"
-		values = [self.action_values[(compressed_state, action)] for action in PacmanRules.getLegalActions(state, self.index)]
+		values = [self.action_values[(compressed_state, action)] for action in self.getLegalActions(state)]
 		opt_value = 0
 		if(len(values) == 0):
 			opt_value = 0.0
 		else:
 			opt_value = max(values)
 
-		for action in PacmanRules.getLegalActions(state, self.index):
-			# print(self.action_values[(compressed_state, action)], action)
+		for action in self.getLegalActions(state):
 			if(self.action_values[(compressed_state, action)] == opt_value):
 				return action
 
@@ -225,16 +237,25 @@ class QLearningAgent(ReinforcementAgent):
 		  HINT: To pick randomly from a list, use random.choice(list)
 		"""
 		# Pick Action
-		compressed_state = str(self.thisIsIT(state))
-		legalActions = PacmanRules.getLegalActions(state, self.index)
-		# print(legalActions)
+		compressed_state = self.thisIsIT(state.deepCopy())
+		legActions = self.getLegalActions(state)
+		print(legActions)
 		action = None
 		"*** YOUR CODE HERE ***"
-		if(len(legalActions) != 0):
+		print(self.numTraining - self.episodesSoFar,"trainingleft",self.epsilon, "epsilon") #whoami
+		if(len(legActions) != 0):
 			if(random.random() < self.epsilon):
-				return random.choice(legalActions)
-			return self.computeActionFromQValues(state, compressed_state)
-		return action
+				action = random.choice(legActions)
+			else:
+				action = self.computeActionFromQValues(state, compressed_state)
+		self.doAction(state.deepCopy(),action)#whoami
+		
+		f = open("actions.txt", "a")
+		f.write("get action\n")
+		f.write(str(compressed_state)+"\n");f.write(str(legActions)+" "+str(action)+"\n")
+		f.close()
+		
+		return action #whoami
 
 	def update(self, state, action, nextState, reward):
 		"""
@@ -246,43 +267,60 @@ class QLearningAgent(ReinforcementAgent):
 		  it will be called on your behalf
 		"""
 		"*** YOUR CODE HERE ***"
-		compressed_state = str(self.thisIsIT(state))
-		compressed_nextState = str(self.thisIsIT(nextState))
+		print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
+		compressed_state = self.thisIsIT(state.deepCopy())
+		compressed_nextState = self.thisIsIT(nextState.deepCopy())
+		#whoami
+		f = open("actions.txt", "a")
+		f.write("updation\n")
+		f.write(str(compressed_state)+"\n");
+		f.write(str(action)+"\n")
+		f.write(str(compressed_nextState)+"\n")
+		f.write(str(reward)+" "+str(self.discount*self.computeValueFromQValues(nextState, compressed_nextState))+" "+str(self.action_values[(compressed_state, action)])+" "+str(self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)]))+"\n")
+		f.close()#whoami
+
 		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
+		
 
-	# def getPolicy(self, state):
-	# 	return self.computeActionFromQValues(state)
+	#whoami ignore them for now
+	def getPolicy(self, state):
+		return self.computeActionFromQValues(state)
 
-	# def getValue(self, state):
-	# 	return self.computeValueFromQValues(state)
+	def getValue(self, state):
+		return self.computeValueFromQValues(state)
 
 
-class MyAgent(QLearningAgent):
-	"Exactly the same as QLearningAgent, but with different default parameters"
 
-	def __init__(self, epsilon=0.05,gamma=0.8,alpha=0.2, numTraining=0, **args):
-		"""
-		These default parameters can be changed from the pacman.py command line.
-		For example, to change the exploration rate, try:
-			python pacman.py -p PacmanQLearningAgent -a epsilon=0.1
 
-		alpha    - learning rate
-		epsilon  - exploration rate
-		gamma    - discount factor
-		numTraining - number of training episodes, i.e. no learning after these many episodes
-		"""
-		args['epsilon'] = epsilon
-		args['gamma'] = gamma
-		args['alpha'] = alpha
-		args['numTraining'] = numTraining
-		QLearningAgent.__init__(self, **args)
 
-	def getAction(self, state):
-		"""
-		Simply calls the getAction method of QLearningAgent and then
-		informs parent of action for Pacman.  Do not change or remove this
-		method.
-		"""
-		action = QLearningAgent.getAction(self,state)
-		self.doAction(state,action)
-		return action
+
+
+
+
+# class MyAgent(QLearningAgent):
+# 	"Exactly the same as QLearningAgent, but with different default parameters"
+
+# 	def __init__(self, epsilon=0.5,gamma=0.9,alpha=0.3, numTraining=0, **args):
+# 		"""
+# 		These default parameters can be changed from the pacman.py command line.
+# 		For example, to change the exploration rate, try:
+# 			python pacman.py -p PacmanQLearningAgent -a epsilon=0.1
+
+# 		alpha    - learning rate
+# 		epsilon  - exploration rate
+# 		gamma    - discount factor
+# 		numTraining - number of training episodes, i.e. no learning after these many episodes
+# 		"""
+		
+# 	def getAction(self, state):
+# 		"""
+# 		Simply calls the getAction method of QLearningAgent and then
+# 		informs parent of action for Pacman.  Do not change or remove this
+# 		method.
+# 		"""
+# 		action = QLearningAgent.getAction(self,state)
+# 		self.doAction(state,action)
+# 		return action
+
+
+#state generalization required, reward incentivization required

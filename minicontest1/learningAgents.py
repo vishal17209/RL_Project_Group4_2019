@@ -141,6 +141,11 @@ class ReinforcementAgent(ValueEstimationAgent):
         self.lastAction = None
         self.episodeRewards = 0.0
 
+        f = open("actions.txt", "a")
+        f.write("train"+str(self.episodesSoFar)+":\n")
+        f.close()#whoami
+
+
     def stopEpisode(self):
         """
           Called by environment when episode is done
@@ -150,6 +155,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         else:
             self.accumTestRewards += self.episodeRewards
         self.episodesSoFar += 1
+        self.alpha=1/(self.episodesSoFar+1) #whoami
         if self.episodesSoFar >= self.numTraining:
             # Take off the training wheels
             self.epsilon = 0.0    # no exploration
@@ -181,6 +187,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         self.alpha = float(alpha)
         self.discount = float(gamma)
         self.index = index
+        print(self.epsilon,self.alpha,self.numTraining)
 
     ################################
     # Controls needed for Crawler  #

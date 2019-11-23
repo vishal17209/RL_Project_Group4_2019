@@ -113,7 +113,7 @@ class GameState:
         # TODO make sure this is right -> want to have it just decrement by time once
         # Or maybe decrement for all
         if agentIndex < self.data.numPacmanAgents:
-            state.data.scoreChange += - 0.4 * TIME_PENALTY # Penalty for waiting around
+            state.data.scoreChange += - 1.3 * TIME_PENALTY # Penalty for waiting around
         else:
             GhostRules.decrementTimer( state.data.agentStates[agentIndex] )
 
@@ -279,7 +279,7 @@ class GameState:
 ############################################################################
 
 SCARED_TIME = 40    # Moves ghosts are scared
-COLLISION_TOLERANCE = 0.7 # How close ghosts must be to Pacman to kill
+COLLISION_TOLERANCE = 0.0 # How close ghosts must be to Pacman to kill #whoami
 TIME_PENALTY = 1 # Number of points lost each round
 
 class ClassicGameRules:
@@ -359,6 +359,7 @@ class PacmanRules:
         """
         legal = PacmanRules.getLegalActions( state, agentIndex )
         if action not in legal:
+            print(state);print(action) #whoami
             raise Exception("Illegal action " + str(action))
 
         pacmanState = state.data.agentStates[agentIndex]
@@ -379,7 +380,7 @@ class PacmanRules:
         x,y = position
         # Eat food
         if state.data.food[x][y]:
-            state.data.scoreChange += 10
+            state.data.scoreChange += 100
             state.data.food = state.data.food.copy()
             state.data.food[x][y] = False
             state.data._foodEaten = position
@@ -389,7 +390,6 @@ class PacmanRules:
                 state.data.scoreChange += 500
                 state.data._win = True
         # Eat capsule
-        # EDIT HERE
         if( position in state.getCapsules() ):
             state.data.capsules.remove( position )
             state.data._capsuleEaten = position
@@ -402,7 +402,7 @@ class GhostRules:
     """
     These functions dictate how ghosts interact with their environment.
     """
-    GHOST_SPEED=1.0
+    GHOST_SPEED=1 #whoami
     def getLegalActions( state, ghostIndex ):
         """
         Ghosts cannot stop, and cannot turn around unless they
@@ -463,15 +463,16 @@ class GhostRules:
         else:
             # print(state.data.deathCount) #whoami
             if not state.data._win:
-                state.data.scoreChange -= 10 #whoami
-                # state.data._lose = False#True #whoami
+                state.data.scoreChange -= 500 #whoami
                 state.data.deathCount+=1
-                if(state.data.deathCount>=2):
+                if(state.data.deathCount>=2): #adjust death count for multiagent pacman #whoami 
                     state.data._lose=True
                 #whoami
+    
     collide = staticmethod( collide )
 
     def canKill( pacmanPosition, ghostPosition ):
+        print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
         return manhattanDistance( ghostPosition, pacmanPosition ) <= COLLISION_TOLERANCE
     canKill = staticmethod( canKill )
 
@@ -691,7 +692,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
         game.run()
         if not beQuiet: games.append(game)
 
-        if record and i >= numTraining:
+        if record:
             import time, pickle
             fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
             f = open(fname, 'wb')

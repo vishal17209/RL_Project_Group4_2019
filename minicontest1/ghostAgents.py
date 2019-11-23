@@ -64,7 +64,7 @@ class DirectionalGhost(GhostAgent):
 
         speed = 1
         if isScared:
-            speed = 0.5
+            speed = 1 #0.5 whoami
 
         actionVectors = [Actions.directionToVector(
             a, speed) for a in legalActions]
