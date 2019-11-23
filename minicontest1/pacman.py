@@ -113,7 +113,7 @@ class GameState:
         # TODO make sure this is right -> want to have it just decrement by time once
         # Or maybe decrement for all
         if agentIndex < self.data.numPacmanAgents:
-            state.data.scoreChange += - 1.3 * TIME_PENALTY # Penalty for waiting around
+            state.data.scoreChange += - 0.4 * TIME_PENALTY # Penalty for waiting around
         else:
             GhostRules.decrementTimer( state.data.agentStates[agentIndex] )
 
@@ -308,11 +308,11 @@ class ClassicGameRules:
         if state.isLose(): self.lose(state, game)
 
     def win( self, state, game ):
-        if not self.quiet: print("Pacman emerges victorious! Score: %d" % state.data.score)
+        # if not self.quiet: print("Pacman emerges victorious! Score: %d" % state.data.score)
         game.gameOver = True
 
     def lose( self, state, game ):
-        if not self.quiet: print("Pacman died! Score: %d" % state.data.score)
+        # if not self.quiet: print("Pacman died! Score: %d" % state.data.score)
         game.gameOver = True
 
     def getProgress(self, game):
@@ -380,7 +380,7 @@ class PacmanRules:
         x,y = position
         # Eat food
         if state.data.food[x][y]:
-            state.data.scoreChange += 100
+            state.data.scoreChange += 10
             state.data.food = state.data.food.copy()
             state.data.food[x][y] = False
             state.data._foodEaten = position
@@ -391,6 +391,7 @@ class PacmanRules:
                 state.data._win = True
         # Eat capsule
         if( position in state.getCapsules() ):
+            state.data.scoreChange += 20 #reward if any to be given for the power-up(apart from that it scares all) #whoami
             state.data.capsules.remove( position )
             state.data._capsuleEaten = position
             # Reset all ghosts' scared timers
@@ -426,7 +427,7 @@ class GhostRules:
 
         ghostState = state.data.agentStates[ghostIndex]
         speed = GhostRules.GHOST_SPEED
-        if ghostState.scaredTimer > 0: speed /= 2.0
+        # if ghostState.scaredTimer > 0: speed /= 2.0 #whoami
         vector = Actions.directionToVector( action, speed )
         ghostState.configuration = ghostState.configuration.generateSuccessor( vector )
     applyAction = staticmethod( applyAction )
@@ -465,14 +466,14 @@ class GhostRules:
             if not state.data._win:
                 state.data.scoreChange -= 500 #whoami
                 state.data.deathCount+=1
-                if(state.data.deathCount>=2): #adjust death count for multiagent pacman #whoami 
+                if(state.data.deathCount>=2): #adjust death count for multiagent pacman #whoami
                     state.data._lose=True
                 #whoami
-    
+
     collide = staticmethod( collide )
 
     def canKill( pacmanPosition, ghostPosition ):
-        print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
+        # print(ghostPosition, pacmanPosition,manhattanDistance( ghostPosition, pacmanPosition ))
         return manhattanDistance( ghostPosition, pacmanPosition ) <= COLLISION_TOLERANCE
     canKill = staticmethod( canKill )
 
@@ -656,8 +657,8 @@ def loadPacmanAgent(pacman, nographics):
 def replayGame( layout, actions, display ):
     import pacmanAgents, ghostAgents
     rules = ClassicGameRules()
-    agents = [pacmanAgents.GreedyAgent()] + [ghostAgents.RandomGhost(i+1) for i in range(layout.getNumGhosts())]
-    game = rules.newGame( layout, agents[0], agents[1:], display )
+    agents = [pacmanAgents.GreedyAgent() for i in range(layout.getNumPacmen())] + [ghostAgents.RandomGhost(i+1) for i in range(layout.getNumGhosts())]
+    game = rules.newGame( layout, agents, agents[layout.getNumPacmen():], display )
     state = game.state
     display.initialize(state.data)
 
@@ -692,9 +693,9 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
         game.run()
         if not beQuiet: games.append(game)
 
-        if record:
+        if record and i >= numGames-10:
             import time, pickle
-            fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
+            fname = ('./records/recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
             f = open(fname, 'wb')
             components = {'layout': layout, 'actions': game.moveHistory}
             pickle.dump(components, f)

@@ -487,7 +487,10 @@ class GameStateData:
             if agentState.isPacman:
                 map[x][y] = "P" #self._pacStr(agent_dir) #whoami
             else:
-                map[x][y] = self._ghostStr(agent_dir)
+                if(agentState.scaredTimer>0): #different visibility of 'A' for scared ghosts #whoami
+                    map[x][y] = "A" 
+                else:
+                    map[x][y] = self._ghostStr(agent_dir)
 
         for x, y in self.capsules:
             map[x][y] = 'o'
@@ -624,7 +627,7 @@ class Game:
                 self.unmute()
                 self._agentCrash(i, quiet=True)
                 return
-            
+
             if ("registerInitialState" in dir(agent)):
                 self.mute(i)
                 if self.catchExceptions:
@@ -649,7 +652,7 @@ class Game:
                     agent.registerInitialState(self.state.deepCopy())
                 ## TODO: could this exceed the total time
                 self.unmute()
-            print("registered...") #whoami    
+            # print("registered...") #whoami
 
 
         agentIndex = self.startingIndex
@@ -662,7 +665,7 @@ class Game:
             skip_action = False
 
             # Generate an observation of the state
-            if 'observationFunction' in dir( agent ): 
+            if 'observationFunction' in dir( agent ):
                 self.mute(agentIndex)
                 if self.catchExceptions:
                     try:
@@ -784,10 +787,10 @@ class Game:
             ###self.display.update( self.state.makeObservation(idx).data )
 
             # Allow for game specific conditions (winning, losing, etc.)
-            print("death counter now ",self.state.data.deathCount)#whoami
+            # print("death counter now ",self.state.data.deathCount)#whoami
             self.rules.process(self.state, self)
 
-            print("step ",maihoonnaa,"...",agentIndex) #whoami
+            # print("step ",maihoonnaa,"...",agentIndex) #whoami
             maihoonnaa+=1#whoami
 
             # Track progress
@@ -811,6 +814,6 @@ class Game:
                     self._agentCrash(agentIndex)
                     self.unmute()
                     return
-            print("terminal...") #whoami
-        
+            # print("terminal...") #whoami
+
         self.display.finish()
