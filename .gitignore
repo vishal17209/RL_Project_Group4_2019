@@ -3,4 +3,4 @@ minicontest1/__pycache__/
 reinforcement/__pycache__/
 *.pyc
 */__pycache__/*
-*/action.txt
+*/actions.txt
