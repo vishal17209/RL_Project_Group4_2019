@@ -173,7 +173,7 @@ class QLearningAgent(ReinforcementAgent):
 		pacmanPosition = state.getPacmanPosition(self.index)
 		grid = str(state.data.ToList())
 		grid=grid.split("\n")
-		height, width = state.data.layout.height, state.data.layout.width   
+		height, width = state.data.layout.height, state.data.layout.width
 
 		#for vision = (2vision+1)x(2vision+1) #whoami
 		vision=2
@@ -181,7 +181,7 @@ class QLearningAgent(ReinforcementAgent):
 		for lul in range(len(new_state)):
 			new_state[lul]=new_state[lul][max(0, pacmanPosition[0]-vision):min(len(grid[0]), 1+pacmanPosition[0]+vision)]
 		new_state="\n".join(new_state)
-		
+
 		return new_state
 		# return state.getPacmanState( self.index ) #whoami
 		# return pacmanPosition #whoami
@@ -252,8 +252,8 @@ class QLearningAgent(ReinforcementAgent):
 		# 	print(pacmanPosition)
 		# 	print("row clip",max(0, (height-1-pacmanPosition[1])-1),min(height, (height-pacmanPosition[1])+1))
 		# 	print("column clip",max(0, pacmanPosition[0]-1),min(len(grid[0]), pacmanPosition[0]+2),grid[0])
-		# 	print("new_state", self.index) 
-		# 	print(compressed_state) 
+		# 	print("new_state", self.index)
+		# 	print(compressed_state)
 
 		legActions = self.getLegalActions(state)
 		# print(legActions)
@@ -358,5 +358,5 @@ class QLearningAgent(ReinforcementAgent):
 #state generalization required, reward incentivization required
 
 #in the state(valid actions remain intact), but the description priority remains:
-#power up overlaps all, ghost overlaps pacman and pacman overlaps scared ghost 
+#power up overlaps all, ghost overlaps pacman and pacman overlaps scared ghost
 #also, power up reward added, pellet reward and time penalty changed, and scared ghost visibility added
