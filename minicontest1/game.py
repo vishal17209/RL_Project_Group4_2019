@@ -26,7 +26,7 @@ import math
 import traceback
 import sys
 
-SCALING_FACTOR = 1000
+SCALING_FACTOR = 1 #1000 whoami
 
 #######################
 # Parts worth reading #
@@ -467,6 +467,33 @@ class GameStateData:
 
         return str(map) + ("\nScore: %d\n" % self.score)
 
+    def ToList(self):
+        width, height = self.layout.width, self.layout.height
+        map = Grid(width, height)
+        if type(self.food) == type((1, 2)):
+            self.food = reconstituteGrid(self.food)
+        for x in range(width):
+            for y in range(height):
+                food, walls = self.food, self.layout.walls
+                map[x][y] = self._foodWallStr(food[x][y], walls[x][y])
+
+        for agentState in self.agentStates:
+            if agentState == None:
+                continue
+            if agentState.configuration == None:
+                continue
+            x, y = [int(i) for i in nearestPoint(agentState.configuration.pos)]
+            agent_dir = agentState.configuration.direction
+            if agentState.isPacman:
+                map[x][y] = "P" #self._pacStr(agent_dir) #whoami
+            else:
+                map[x][y] = self._ghostStr(agent_dir)
+
+        for x, y in self.capsules:
+            map[x][y] = 'o'
+
+        return map
+
     def _foodWallStr( self, hasFood, hasWall ):
         if hasFood:
             return '.'
@@ -537,7 +564,7 @@ class Game:
         self.startingIndex = startingIndex
         self.gameOver = False
         self.muteAgents = muteAgents
-        self.catchExceptions = catchExceptions
+        self.catchExceptions = False#catchExceptions whoami
         self.moveHistory = []
         self.totalAgentTimes = [0 for agent in agents]
         self.totalAgentTimeWarnings = [0 for agent in agents]
@@ -597,6 +624,7 @@ class Game:
                 self.unmute()
                 self._agentCrash(i, quiet=True)
                 return
+
             if ("registerInitialState" in dir(agent)):
                 self.mute(i)
                 if self.catchExceptions:
@@ -621,15 +649,18 @@ class Game:
                     agent.registerInitialState(self.state.deepCopy())
                 ## TODO: could this exceed the total time
                 self.unmute()
+            # print("registered...") #whoami
+
 
         agentIndex = self.startingIndex
         numAgents = len( self.agents )
-
+        maihoonnaa=1 #whoami
         while not self.gameOver:
             # Fetch the next agent
             agent = self.agents[agentIndex]
             move_time = 0
             skip_action = False
+
             # Generate an observation of the state
             if 'observationFunction' in dir( agent ):
                 self.mute(agentIndex)
@@ -699,37 +730,40 @@ class Game:
                     return
             else:
                 # try:
-                timed_func = TimeoutFunction(agent.getAction, int(math.ceil(self.state.data.score / SCALING_FACTOR)))
-                try:
-                    start_time = time.time()
-                    action = timed_func(observation)
-                except TimeoutFunctionException:
-                    print('You have run out of compute time! You exceeded {:.3f}s of compute'.format(self.state.data.score / SCALING_FACTOR))
-                    self.state.data.score = 0
-                    self.state.data._lose = True
-                    self.rules.process(self.state, self)
-                    continue
-                # except:
-                #     print('Your agent crashed!')
+                # timed_func = TimeoutFunction(agent.getAction, int(math.ceil(self.state.data.score / (SCALING_FACTOR+1))))
+                # try:
+                #     start_time = time.time()
+                #     action = timed_func(observation)
+                # except TimeoutFunctionException:
+                #     print('You have run out of compute time! You exceeded {:.3f}s of compute'.format(self.state.data.score / (SCALING_FACTOR+1)))
                 #     self.state.data.score = 0
                 #     self.state.data._lose = True
                 #     self.rules.process(self.state, self)
                 #     continue
-                move_time = time.time() - start_time
+                # # except:
+                # #     print('Your agent crashed!')
+                # #     self.state.data.score = 0
+                # #     self.state.data._lose = True
+                # #     self.rules.process(self.state, self)
+                # #     continue
+                # move_time = time.time() - start_time
+                action = agent.getAction(self.state.deepCopy())
+                assert(action in self.state.getLegalActions(agentIndex)), str(self.state) + " "+ str(self.state.getLegalActions(agentIndex)) +" "+str(action) +" " + str(agentIndex)
+                #whoami
+
             self.unmute()
 
-            self.state.data.score += -move_time * SCALING_FACTOR
+            self.state.data.score += 0 #whoami max(0,-1 * SCALING_FACTOR)
             # if self.state.data.score <= 0:
             #     self.state.data.score = 0
             #     self.state.data._lose = True
             #     self.rules.process(self.state, self)
             #     continue #whoami
-            if self.state.data.deathCount >= 2:
-                # self.state.data.score = 0
-                self.state.data._lose = True
-                self.rules.process(self.state, self)
-                continue
-                #whoami
+            # if self.state.data.deathCount >= 2:
+            #     self.state.data._lose = True
+            #     self.rules.process(self.state, self)
+            #     continue
+            #     #whoami
 
             # Execute the action
             self.moveHistory.append( (agentIndex, action) )
@@ -750,7 +784,12 @@ class Game:
             ###self.display.update( self.state.makeObservation(idx).data )
 
             # Allow for game specific conditions (winning, losing, etc.)
+            # print("death counter now ",self.state.data.deathCount)#whoami
             self.rules.process(self.state, self)
+
+            # print("step ",maihoonnaa,"...",agentIndex) #whoami
+            maihoonnaa+=1#whoami
+
             # Track progress
             if agentIndex == numAgents + 1: self.numMoves += 1
             # Next agent
@@ -758,6 +797,7 @@ class Game:
 
             if _BOINC_ENABLED:
                 boinc.set_fraction_done(self.getProgress())
+
 
         # inform a learning agent of the game result
         for agentIndex, agent in enumerate(self.agents):
@@ -771,4 +811,6 @@ class Game:
                     self._agentCrash(agentIndex)
                     self.unmute()
                     return
+            # print("terminal...") #whoami
+
         self.display.finish()
