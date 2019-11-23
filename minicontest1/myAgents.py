@@ -359,3 +359,4 @@ class QLearningAgent(ReinforcementAgent):
 
 #in the state(valid actions remain intact), but the description priority remains:
 #power up overlaps all, ghost overlaps pacman and pacman overlaps scared ghost 
+#also, power up reward added, pellet reward and time penalty changed, and scared ghost visibility added
