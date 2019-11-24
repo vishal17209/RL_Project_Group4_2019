@@ -180,7 +180,7 @@ class QLearningAgent(ReinforcementAgent):
 		new_state = grid[max(0, (height-1-pacmanPosition[1])-vision):min(height, (height-pacmanPosition[1])+vision)]
 		for lul in range(len(new_state)):
 			new_state[lul]=new_state[lul][max(0, pacmanPosition[0]-vision):min(len(grid[0]), 1+pacmanPosition[0]+vision)]
-		new_state="\n".join(new_state)
+		new_state="\n".join(new_state) + str(state.data.deathCount)
 		
 		return new_state
 		# return state.getPacmanState( self.index ) #whoami
