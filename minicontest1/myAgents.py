@@ -156,7 +156,7 @@ class QLearningAgent(ReinforcementAgent):
 		- self.getLegalActions(state)
 		  which returns legal actions for a state
 	"""
-	def __init__(self, epsilon=0.3,gamma=0.9,alpha=1, numTraining=50000, **args):
+	def __init__(self, epsilon=0.1,gamma=0.9,alpha=1, numTraining=50000, **args):
 
 		"You can initialize Q-values here..."
 		args['epsilon'] = epsilon
