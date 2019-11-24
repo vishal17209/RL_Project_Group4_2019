@@ -156,7 +156,7 @@ class QLearningAgent(ReinforcementAgent):
 		- self.getLegalActions(state)
 		  which returns legal actions for a state
 	"""
-	def __init__(self, epsilon=0.3,gamma=0.9,alpha=1, numTraining=50000, **args):
+	def __init__(self, epsilon=0.1,gamma=0.9,alpha=1, numTraining=50000, **args):
 
 		"You can initialize Q-values here..."
 		args['epsilon'] = epsilon
@@ -177,7 +177,7 @@ class QLearningAgent(ReinforcementAgent):
 		height, width = state.data.layout.height, state.data.layout.width   
 
 		#for vision = (2vision+1)x(2vision+1) #whoami
-		vision=10
+		vision=2
 		new_state = grid[max(0, (height-1-pacmanPosition[1])-vision):min(height, (height-pacmanPosition[1])+vision)]
 		for lul in range(len(new_state)):
 			new_state[lul]=new_state[lul][max(0, pacmanPosition[0]-vision):min(len(grid[0]), 1+pacmanPosition[0]+vision)]
