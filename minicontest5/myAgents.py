@@ -314,7 +314,7 @@ class QLearningAgent(ReinforcementAgent):
 
 		#whoami
 		self.action_values_num[(compressed_state, action)]+=1
-		self.action_values[(compressed_state, action)] += (reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])/max(1,self.action_values_num[(compressed_state, action)])
+		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])/max(1,self.action_values_num[(compressed_state, action)])
 		# self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
 
 
