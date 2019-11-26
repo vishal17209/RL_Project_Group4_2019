@@ -15,6 +15,13 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	Default 2 pacmen are spawned
 	"""
 	def __init__(self, **args):	
+		args['epsilon'] = epsilon
+		args['gamma'] = gamma
+		args['alpha'] = alpha
+		args['numTraining'] = numTraining
+
+		self.lr = 1e-4
+
 		self.num_agents = 2
 
 		self.agent_1 = ReinforcementAgent.__init__(self, **args)
@@ -63,7 +70,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			f_sum += np.exp(np.dot(np.concatenate((observes[i], actions[i]), axis=None), self.policy_params[i]))
 
 		x = f/f_sum
-		return 1-x
+		return self.lr*(1-x)
 
 	def getActionValueUpdate(self, agent_idx, state, actions, next_state, reward):
 		"""
@@ -84,4 +91,29 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		Return reduced states for all agents in a tuple or list
 		"""
 		raise NotImplementedError
+		
+		offset = 3
+		compressed_state = self.thisIsIT(state)
+		#remove only the line below
+		compressed_state = compressed_state.ToList()
+		food = state.getFood()
+		walls = state.getWalls()
+		ghostPositions = state.getGhostPositions()
+		isscared = state.getGhostStates()[0].scaredTimer > 0
+		pacmanPosition = [state.getPacmanPosition(i) for i in range(self.n)]
+		#state = (encoded food positions, encoded pacman position, encoded wall positions, encoded capsule positions, ghostScared)
+		i_start = pacmanPosition[index] - offset
+		i_end = pacmanPosition[index] + offset
+		j_start = pacmanPosition[index] - offset
+		j_end = pacmanPosition[index] + offset 
+		
+		foods = []
+		walls = []
+		for i in range(len(food)):
+			for j in range(len(food[0])):
+				if(food[i][j]):
+					foods.append((i,j))
+				if(walls[i][j]):
+					walls.append(i,j)
 
+		return state
