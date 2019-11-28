@@ -493,6 +493,8 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		self.action_values_num[(curr_observe, curr_actions)]+=1
 		self.action_values[(curr_observe, curr_actions)] += self.alpha*(reward[self.index] + self.discount*self.action_values[(next_observe, next_actions)] - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
 
+		print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
+
 
 
 	def featureExtractor(self, state):

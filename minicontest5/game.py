@@ -677,16 +677,16 @@ class Game:
 
 
 
-            act_vect=[];action_list=[];reward_vect=[]
+            act_vect=[];action_list=[];reward_vect=[]; tab_ka_state=self.state
             for i in range(len(self.agents)):
                 action = self.agents[i].getAction(self.state.deepCopy())
                 assert(action in self.state.getLegalActions(i)), str(self.state) + " "+ str(self.state.getLegalActions(i)) +" "+str(action) +" " + str(i)      
                 action_list.append(action)
                 if(self.state.data.agentStates[i].isPacman):
                     act_vect.append(action)
-
-            print(act_vect,"yahan")
-            old_state=self.state.deepCopy();print(self.state,"wahan")
+                
+            print(tab_ka_state,"tab_ka_state") ; print(action_list,"yahan")
+            old_state=self.state.deepCopy();#print(self.state,"wahan")
             for i in range(len(self.agents)):
                 if(self.state.data._win or self.state.data._lose):
                     # self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
@@ -695,16 +695,22 @@ class Game:
                     # print(self.state,"kahan2")
                     
                     if(self.state.data.agentStates[i].isPacman):
-                        print("udhar",i)
+                        # print("udhar",i)
                         reward_vect.append(0)            
                     continue
-                    
-                self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
+                try:    
+                    self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
+                    print(self.state),print("focus",i)
+                except Exception:
+                    print("ye lo bhai");print(i);print(action_list);print(tab_ka_state,"tab_ka_state")
+                    print(self.state,"abhi ka state")
+                    raise Exception("Illegal action")
+
                 self.display.update( self.state.data )
                 self.rules.process(self.state, self)
 
                 if(self.state.data.agentStates[i].isPacman):
-                    print("idhar",i)
+                    # print("idhar",i)
                     reward_vect.append(self.state.data.score-old_score)
                 else:
                     r=self.state.data.score-old_score
@@ -791,7 +797,7 @@ class Game:
 
             
 
-            # print("step ",maihoonnaa,"...",agentIndex) #whoami
+            print("maihoonnaa ",maihoonnaa,"...") #whoami
             maihoonnaa+=1#whoami
 
             # Track progress
