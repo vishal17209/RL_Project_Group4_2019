@@ -416,7 +416,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			else:
 				hot[5]=1
 
-			h_values.append( (np.dot(np.concatenate((observe, hot), axis=None), policy_params), action) )
+			h_values.append( (np.dot(np.concatenate((observe, hot), axis=None), self.policy_params), action) )
 
 		
 		return max(h_values)[1]
@@ -533,7 +533,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			else:
 				pass
 
-		return np.concatenate((scared, ghosts, pacman, pellet, powerup, space, wall), axis=None)		
+		return np.concatenate((scared, ghosts, pacman, pellets, powerup, space, wall), axis=None)		
 
 
 

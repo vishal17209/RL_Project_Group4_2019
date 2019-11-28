@@ -423,6 +423,7 @@ class GhostRules:
 
         legal = GhostRules.getLegalActions( state, ghostIndex )
         if action not in legal:
+            print(state,"aaja please") #whoami isse hatao turant
             raise Exception("Illegal ghost action " + str(action))
 
         ghostState = state.data.agentStates[ghostIndex]
