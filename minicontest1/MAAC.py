@@ -35,7 +35,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		self.policy_params_2 = np.random.rand(100, 1) # Fix this!
 		self.policy_params = [self.policy_params_1, self.policy_params_2]
 
-		self.replay_buffer = util.Counter() # Store as: ((current state, next state), (action 1, action 2), (reward 1, reward 2))
+		self.replay_buffer = [] # Store as: ((current state, next state), (action 1, action 2), (reward 1, reward 2))
 
 	def getActionValue(self, action, observes, actions, action_values):
 		"""
@@ -62,7 +62,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		"""
 		# raise NotImplementedError
 		# Sample from replay buffer ...
-		states, actions, rewards = np.random.randint(len(self.replay_buffer))
+		states, actions, rewards = self.replay_buffer[np.random.randint(len(self.replay_buffer))]
 		observes = self.featureExtractor(states[0])
 		f = np.exp(np.dot(np.concatenate((observes[agent_idx], actions[agent_idx]), axis=None), self.policy_params[agent_idx]))
 		f_sum = 0
