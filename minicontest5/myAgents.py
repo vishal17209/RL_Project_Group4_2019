@@ -354,7 +354,6 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		self.action_values = util.Counter()
 		self.action_values_num = util.Counter()
 
-		---------------
 
 		self.vision=5
 
@@ -392,12 +391,14 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		return self.action_values[(observes, actions)] 
 
 	
-	def getAction(self, observe, state):
+	def getAction(self, state):
 		"""
 		Uses policy parameters to return actions
 		"""
 		# raise NotImplementedError
 		legal_actions = state.getLegalActions(self.index) # Make sure that getLegalActions is returning legal actions for our agent.
+
+		observe=self.featureExtractor(state.deepCopy())
 
 		h_values = [] # Not bothering with softmax here...
 		for action in legal_actions:
@@ -481,7 +482,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		next_observe = self.featureExtractor(next_state.deepCopy())
 		next_actions = []
 		for i in range(len(curr_actions)):
-			next_actions.append(self.getAction( next_observe, state))
+			next_actions.append(self.getAction( next_state ))
 
 		next_actions = tuple(next_actions)
 
