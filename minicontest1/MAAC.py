@@ -37,7 +37,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		self.replay_buffer = util.Counter() # Store as: ((current state, next state), (action 1, action 2), (reward 1, reward 2))
 
-	def getActionValue(self, action, observes, actions, action_values):
+	def getActionValue(self, observes, actions, action_values):
 		"""
 		From big Q function, associate value with agent observation.
 		actions = (action_1, action_2)
@@ -52,39 +52,40 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		"""
 		# raise NotImplementedError
 		legal_actions = state.getLegalActions(state, agent_idx) # Make sure that getLegalActions is returning legal actions for our agent.
-		q_values = [(np.dot(np.concatenate((observe, action), axis=None), policy_params), action) for action in legal_actions] # Not bothering with softmax here...
+		h_values = [(np.dot(np.concatenate((observe, action), axis=None), policy_params), action) for action in legal_actions] # Not bothering with softmax here...
 
-		return max(q_values)[1]
+		return max(h_values)[1]
 
-	def getPolicyParamUpdate(self, agent_idx):
+	def getPolicyParamUpdate(self, curr_state, curr_actions, rewards, next_state):
 		"""
 		Return policy parameter update 
 		"""
 		# raise NotImplementedError
 		# Sample from replay buffer ...
-		states, actions, rewards = np.random.randint(len(self.replay_buffer))
-		observes = self.featureExtractor(states[0])
-		f = np.exp(np.dot(np.concatenate((observes[agent_idx], actions[agent_idx]), axis=None), self.policy_params[agent_idx]))
+		# states, actions, rewards,  = np.random.randint(len(self.replay_buffer))
+
+		curr_observes = self.featureExtractor(curr_state) # for the corresponding agent index.
+		f = np.exp(np.dot(np.concatenate((curr_observes, curr_actions[self.index]), axis=None), self.policy_params))
 		f_sum = 0
-		for i in range(self.num_agents):
-			f_sum += np.exp(np.dot(np.concatenate((observes[i], actions[i]), axis=None), self.policy_params[i]))
+		for action in curr_state.getLegalActions(self.index):
+			f_sum += np.exp(np.dot(np.concatenate((curr_observes, action), axis=None), self.policy_params))
 
 		x = f/f_sum
 		return self.lr*(1-x)
 
-	def getActionValueUpdate(self, agent_idx, state, actions, next_state, reward):
+	def getActionValueUpdate(self, agent_idx, curr_state, curr_actions, next_state, next_actions, reward):
 		"""
 		Get ActionValue update (just add to real action value)
 		actions: must be tuple of all actions (indexed)
 		"""
-		curr_observe = self.featureExtractor(state)
+		curr_observe = self.featureExtractor(curr_state)
 		next_observe = self.featureExtractor(next_state)
 		next_actions = []
-		for i in range(self.num_agents):
-			next_actions.append(self.getAction(i, next_observe[i], self.policy_params[i], state, self.action_values[i]))
+		for i in range(len(curr_actions)):
+			next_actions.append(self.getAction(self.index, next_observe, self.policy_params, state, self.action_values))
 
 		next_actions = tuple(next_actions)
-		return self.alpha*(reward + self.discount*self.getActionValue(next_observe, next_actions) - self.getActionValue(curr_observe, actions))
+		self.action_values[(curr_observe, curr_actions)] += self.alpha*(reward + self.discount*self.getActionValue(next_observe, next_actions) - self.getActionValue(curr_observe, curr_actions))
 
 	def featureExtractor(self, state):
 		"""
