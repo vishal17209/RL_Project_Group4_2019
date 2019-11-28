@@ -27,6 +27,8 @@ import traceback
 import sys
 import copy
 
+
+COLLISION_TOLERANCE = 0.0
 SCALING_FACTOR = 1 #1000 whoami
 
 #######################
@@ -675,32 +677,49 @@ class Game:
 
 
 
-            act_vect=[];reward_vect=[]
+            act_vect=[];action_list=[];reward_vect=[]
             for i in range(len(self.agents)):
-                action = agent.getAction(self.state.deepCopy())
-                assert(action in self.state.getLegalActions(agentIndex)), str(self.state) + " "+ str(self.state.getLegalActions(agentIndex)) +" "+str(action) +" " + str(agentIndex)      
-                act_vect.append(action)
+                action = self.agents[i].getAction(self.state.deepCopy())
+                assert(action in self.state.getLegalActions(i)), str(self.state) + " "+ str(self.state.getLegalActions(i)) +" "+str(action) +" " + str(i)      
+                action_list.append(action)
+                if(self.state.data.agentStates[i].isPacman):
+                    act_vect.append(action)
 
             print(act_vect,"yahan")
             old_state=self.state.deepCopy();print(self.state,"wahan")
             for i in range(len(self.agents)):
                 if(self.state.data._win or self.state.data._lose):
+                    # self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
+                    # reward_vect.append(self.state.data.score-old_score)
+                    # old_score=self.state.data.score
+                    # print(self.state,"kahan2")
                     
-                    self.state=self.state.generateSuccessor( i, act_vect[i] ) #agentIndex, action
-                    reward_vect.append(self.state.data.score-old_score)
-                    old_score=self.state.data.score
-                    print(self.state,"kahan")
-                    for j in range(i+1,len(self.agents)):
-                        reward_vect.append(0)        
-                    break
-                
-                self.state=self.state.generateSuccessor( i, act_vect[i] ) #agentIndex, action
-                reward_vect.append(self.state.data.score-old_score)
-                old_score=self.state.data.score
-                print(self.state,"kahan")
+                    if(self.state.data.agentStates[i].isPacman):
+                        print("udhar",i)
+                        reward_vect.append(0)            
+                    continue
+                    
+                self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
+                self.display.update( self.state.data )
+                self.rules.process(self.state, self)
 
+                if(self.state.data.agentStates[i].isPacman):
+                    print("idhar",i)
+                    reward_vect.append(self.state.data.score-old_score)
+                else:
+                    r=self.state.data.score-old_score
+                    ghostState = self.state.data.agentStates[i]
+                    ghostPosition = ghostState.configuration.getPosition()
+                    for j in range(self.state.data.numPacmanAgents):
+                        pacmanPosition = self.state.getPacmanPosition( j )
+                        if (manhattanDistance( ghostPosition, pacmanPosition ) <= COLLISION_TOLERANCE):
+                            reward_vect[j]+=(r/self.state.data.numPacmanAgents)    
+                
+                old_score=self.state.data.score
+                
             
-            assert(len(reward_vect)==len(self.agents)), "reward vector flawed"
+
+            assert(len(reward_vect)==self.state.data.numPacmanAgents), "reward vector flawed" + str(reward_vect)
 
             
             replay.append( ( old_state.deepCopy(),copy.deepcopy(act_vect),copy.deepcopy(reward_vect),self.state.deepCopy() ) )
@@ -712,7 +731,7 @@ class Game:
 
                 
                 if 'observationFunction' in dir( agent ):
-                    self.mute(agentIndex)
+                    self.mute(i)
                     if self.catchExceptions:
                         try:
                             timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
@@ -728,7 +747,7 @@ class Game:
                             self.unmute()
                             return
                     else:
-                        observation = agent.observationFunction(self.state.deepCopy())
+                        observation = agent.observationFunction(s_n.deepCopy(),s.deepCopy(), copy.deepcopy(r), copy.deepcopy(a))
                     self.unmute()
                 else:
                     observation = self.state.deepCopy()
@@ -736,7 +755,7 @@ class Game:
 
             # Generate an observation of the state
             if 'observationFunction' in dir( agent ):
-                self.mute(agentIndex)
+                self.mute(i)
                 if self.catchExceptions:
                     try:
                         timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
@@ -762,13 +781,13 @@ class Game:
 
 
             # Change the display
-            self.display.update( self.state.data )
-            ###idx = agentIndex - agentIndex % 2 + 1
-            ###self.display.update( self.state.makeObservation(idx).data )
+            # self.display.update( self.state.data )
+            # ###idx = agentIndex - agentIndex % 2 + 1
+            # ###self.display.update( self.state.makeObservation(idx).data )
 
-            # Allow for game specific conditions (winning, losing, etc.)
-            # print("death counter now ",self.state.data.deathCount, agentIndex)#whoami
-            self.rules.process(self.state, self)
+            # # Allow for game specific conditions (winning, losing, etc.)
+            # # print("death counter now ",self.state.data.deathCount, agentIndex)#whoami
+            # self.rules.process(self.state, self)
 
             
 

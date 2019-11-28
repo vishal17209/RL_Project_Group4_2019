@@ -26,6 +26,7 @@ class GhostAgent(Agent):
 
     def getAction(self, state):
         dist = self.getDistribution(state)
+        print(dist) #whoami
         if len(dist) == 0:
             return Directions.STOP
         else:

@@ -339,7 +339,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	"""
 	Default 2 pacmen are spawned
 	"""
-	def __init__(self, epsilon=0.1,gamma=0.9,alpha=1, numTraining=40000, **args):	
+	def __init__(self, epsilon=0.1,gamma=0.9,alpha=1, numTraining=5000, **args):	
 
 
 		"You can initialize Q-values here..."
@@ -354,12 +354,13 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		self.action_values = util.Counter()
 		self.action_values_num = util.Counter()
 
+		self.vision = 2 #only set this whenever vision is to be adjusted
 
-		self.vision=5
+		self.blockvision=(2*self.vision)+1
 
 		self.lr = 1e-4
 
-		self.policy_params = np.random.rand((self.vision*self.vision*7)+6, 1) # equal to feature vector size
+		self.policy_params = np.random.rand((self.blockvision*self.blockvision*7)+6) # equal to feature vector size
 
 	
 	def thisIsIT(self, state):
@@ -369,7 +370,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		height, width = state.data.layout.height, state.data.layout.width   
 
 		#for vision = (2vision+1)x(2vision+1) #whoami
-		vision=2
+		vision=self.vision
 		new_state = grid[max(0, (height-1-pacmanPosition[1])-vision):min(height, (height-pacmanPosition[1])+vision)]
 		for lul in range(len(new_state)):
 			new_state[lul]=new_state[lul][max(0, pacmanPosition[0]-vision):min(len(grid[0]), 1+pacmanPosition[0]+vision)]
@@ -433,7 +434,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		curr_observe = self.featureExtractor(curr_state.deepCopy()) # for the corresponding agent index.
 		
-		f_sum = 0; temp=np.zeros((self.vision*self.vision*7)+6)
+		f_sum = 0; temp=np.zeros((self.blockvision*self.blockvision*7)+6)
 		for action in curr_state.getLegalActions(self.index):
 			hot=np.zeros(6)
 			if(action=="North"):
@@ -454,6 +455,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			temp += val*(np.concatenate((curr_observe, hot), axis=None))
 
 
+
 		hot=np.zeros(6)
 		if(curr_actions[self.index]=="North"):
 			hot[0]=1
@@ -467,8 +469,8 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			hot[4]=1
 		else:
 			hot[5]=1
-		
-		policy_params += self.lr*self.action_values[(curr_observe,curr_actions)]*(np.concatenate((curr_observe, hot), axis=None) - (temp/f_sum) )
+
+		self.policy_params += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
 
 
 
@@ -485,9 +487,11 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			next_actions.append(self.getAction( next_state ))
 
 		next_actions = tuple(next_actions)
-
+		curr_actions = tuple(curr_actions)
+		curr_observe = tuple(curr_observe)
+		next_observe = tuple(next_observe)
 		self.action_values_num[(curr_observe, curr_actions)]+=1
-		self.action_values[(curr_observe, curr_actions)] += self.alpha*(reward + self.discount*self.action_values[(next_observe, next_actions)] - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
+		self.action_values[(curr_observe, curr_actions)] += self.alpha*(reward[self.index] + self.discount*self.action_values[(next_observe, next_actions)] - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
 
 
 
@@ -499,13 +503,13 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		compressed_state = self.thisIsIT(state.deepCopy())
 		
 		#7 things from a state
-		pacman=np.zeros(self.vision*self.vision)
-		wall=np.zeros(self.vision*self.vision)
-		space=np.zeros(self.vision*self.vision)
-		pellets=np.zeros(self.vision*self.vision)
-		ghosts=np.zeros(self.vision*self.vision)
-		scared=np.zeros(self.vision*self.vision)
-		powerup=np.zeros(self.vision*self.vision)
+		pacman=np.zeros(self.blockvision*self.blockvision)
+		wall=np.zeros(self.blockvision*self.blockvision)
+		space=np.zeros(self.blockvision*self.blockvision)
+		pellets=np.zeros(self.blockvision*self.blockvision)
+		ghosts=np.zeros(self.blockvision*self.blockvision)
+		scared=np.zeros(self.blockvision*self.blockvision)
+		powerup=np.zeros(self.blockvision*self.blockvision)
 
 		it=0
 		for i in compressed_state:

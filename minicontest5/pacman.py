@@ -416,6 +416,7 @@ class GhostRules:
             possibleActions.remove( Directions.STOP )
         if reverse in possibleActions and len( possibleActions ) > 1:
             possibleActions.remove( reverse )
+        print(possibleActions,"ho")
         return possibleActions
     getLegalActions = staticmethod( getLegalActions )
 
