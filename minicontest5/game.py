@@ -666,14 +666,14 @@ class Game:
 
         replay=[];old_score=100
         #####################
-        agentIndex = self.startingIndex
-        numAgents = len( self.agents )
+        # agentIndex = self.startingIndex
+        # numAgents = len( self.agents )
         maihoonnaa=1 #whoami
         while not self.gameOver:
             # Fetch the next agent
-            agent = self.agents[agentIndex]
-            move_time = 0
-            skip_action = False
+            # agent = self.agents[agentIndex]
+            # move_time = 0
+            # skip_action = False
 
 
 
@@ -795,9 +795,9 @@ class Game:
             maihoonnaa+=1#whoami
 
             # Track progress
-            if agentIndex == numAgents + 1: self.numMoves += 1
-            # Next agent
-            agentIndex = ( agentIndex + 1 ) % numAgents
+            # if agentIndex == numAgents + 1: self.numMoves += 1
+            # # Next agent
+            # agentIndex = ( agentIndex + 1 ) % numAgents
 
             if _BOINC_ENABLED:
                 boinc.set_fraction_done(self.getProgress())
