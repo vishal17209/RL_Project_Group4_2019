@@ -25,6 +25,7 @@ import time, os
 import math
 import traceback
 import sys
+import copy
 
 SCALING_FACTOR = 1 #1000 whoami
 
@@ -655,6 +656,50 @@ class Game:
             # print("registered...") #whoami
 
 
+
+
+        replay=[];old_score=100
+        #####################
+        act_vect=[];reward_vect=[]
+        for i in range(len(self.agents)):
+            action = agent.getAction(self.state.deepCopy())
+            act_vect.append(action)
+
+        old_state=self.state.deepCopy()
+        for i in range(len(self.agents)):
+            if(self.state.data._win or self.state.data._lose):
+                self.state=self.state.generateSuccessor( i, act_vect[i] ) #agentIndex, action
+                reward_vect.append(self.state.data.score-old_score)
+                old_score=self.state.data.score
+                
+                for j in range(i+1,len(self.agents)):
+                    reward_vect.append(0)        
+            
+                break
+	        
+            self.state=self.state.generateSuccessor( i, act_vect[i] ) #agentIndex, action
+            reward_vect.append(self.state.data.score-old_score)
+            old_score=self.state.data.score
+
+        assert(len(reward_vect)==len(self.agents)), "reward vector flawed"
+
+        replay.append( ( old_state.deepCopy(),copy.deepcopy(act_vect),copy.deepcopy(reward_vect),self.state.deepCopy() ) )
+
+        for i in range(len(self.agents)):
+            (s,a,r,s_n)=random.choice(replay)
+            agent=self.agents[i]
+
+            agent.getActionValueUpdate()
+
+            agent.getPolicyParamUpdate()
+
+
+
+
+
+
+
+        #####################
         agentIndex = self.startingIndex
         numAgents = len( self.agents )
         maihoonnaa=1 #whoami
