@@ -156,7 +156,7 @@ class QLearningAgent(ReinforcementAgent):
 		- self.getLegalActions(state)
 		  which returns legal actions for a state
 	"""
-	def __init__(self, epsilon=0.3,gamma=0.9,alpha=1, numTraining=100, **args):
+	def __init__(self, epsilon=0.1,gamma=0.9,alpha=1, numTraining=40000, **args):
 
 		"You can initialize Q-values here..."
 		args['epsilon'] = epsilon
@@ -168,6 +168,7 @@ class QLearningAgent(ReinforcementAgent):
 
 		"*** YOUR CODE HERE ***"
 		self.action_values = util.Counter()
+		self.action_values_num = util.Counter()
 
 	def thisIsIT(self, state):
 		pacmanPosition = state.getPacmanPosition(self.index)
@@ -311,7 +312,10 @@ class QLearningAgent(ReinforcementAgent):
 
 		# assert("P" in compressed_nextState and "P" in compressed_state), compressed_state+"\n\n"+compressed_nextState+"\n"+str(nextState.getLegalActions(self.index)) #whoami
 
-		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
+		#whoami
+		self.action_values_num[(compressed_state, action)]+=1
+		self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])/max(1,self.action_values_num[(compressed_state, action)])
+		# self.action_values[(compressed_state, action)] += self.alpha*(reward + self.discount*self.computeValueFromQValues(nextState, compressed_nextState) - self.action_values[(compressed_state, action)])
 
 
 	#whoami ignore them for now
