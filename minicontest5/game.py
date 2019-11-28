@@ -658,7 +658,6 @@ class Game:
 
 
 
-        replay=[];old_score=100
         #####################
         act_vect=[];reward_vect=[]
         for i in range(len(self.agents)):
@@ -698,7 +697,7 @@ class Game:
 
 
 
-
+        replay=[];old_score=100
         #####################
         agentIndex = self.startingIndex
         numAgents = len( self.agents )
@@ -709,6 +708,62 @@ class Game:
             move_time = 0
             skip_action = False
 
+
+
+            act_vect=[];reward_vect=[]
+            for i in range(len(self.agents)):
+                action = agent.getAction(self.state.deepCopy())
+                act_vect.append(action)
+
+            old_state=self.state.deepCopy()
+            for i in range(len(self.agents)):
+                if(self.state.data._win or self.state.data._lose):
+                    self.state=self.state.generateSuccessor( i, act_vect[i] ) #agentIndex, action
+                    reward_vect.append(self.state.data.score-old_score)
+                    old_score=self.state.data.score
+                    
+                    for j in range(i+1,len(self.agents)):
+                        reward_vect.append(0)        
+                
+                    break
+                
+                self.state=self.state.generateSuccessor( i, act_vect[i] ) #agentIndex, action
+                reward_vect.append(self.state.data.score-old_score)
+                old_score=self.state.data.score
+
+            assert(len(reward_vect)==len(self.agents)), "reward vector flawed"
+
+            replay.append( ( old_state.deepCopy(),copy.deepcopy(act_vect),copy.deepcopy(reward_vect),self.state.deepCopy() ) )
+
+            
+            for i in range(len(self.agents)):
+                (s,a,r,s_n)=random.choice(replay)
+                agent=self.agents[i] #i=agentIndex
+
+                
+                if 'observationFunction' in dir( agent ):
+                    self.mute(agentIndex)
+                    if self.catchExceptions:
+                        try:
+                            timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
+                            try:
+                                start_time = time.time()
+                                observation = timed_func(self.state.deepCopy())
+                            except TimeoutFunctionException:
+                                skip_action = True
+                            move_time += time.time() - start_time
+                            self.unmute()
+                        except Exception as data:
+                            self._agentCrash(agentIndex, quiet=False)
+                            self.unmute()
+                            return
+                    else:
+                        observation = agent.observationFunction(self.state.deepCopy())
+                    self.unmute()
+                else:
+                    observation = self.state.deepCopy()
+
+
             # Generate an observation of the state
             if 'observationFunction' in dir( agent ):
                 self.mute(agentIndex)
@@ -717,7 +772,7 @@ class Game:
                         timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
                         try:
                             start_time = time.time()
-                            observation = timed_func(self.state.deepCopy())
+                            observation = timed_func(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
                         except TimeoutFunctionException:
                             skip_action = True
                         move_time += time.time() - start_time
@@ -727,104 +782,14 @@ class Game:
                         self.unmute()
                         return
                 else:
-                    observation = agent.observationFunction(self.state.deepCopy())
+                    observation = agent.observationFunction(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
                 self.unmute()
             else:
                 observation = self.state.deepCopy()
 
-            # Solicit an action
-            action = None
-            self.mute(agentIndex)
-            if self.catchExceptions:
-                try:
-                    # timed_func = TimeoutFunction(agent.getAction, int(self.rules.getMoveTimeout(agentIndex)) - int(move_time))
-                    timed_func = TimeoutFunction(agent.getAction, int(self.state.data.score))
-                    try:
-                        start_time = time.time()
-                        if skip_action:
-                            raise TimeoutFunctionException()
-                        action = timed_func( observation )
-                    except TimeoutFunctionException:
-                        print("Agent %d timed out on a single move!" % agentIndex, file=sys.stderr)
-                        self.agentTimeout = True
-                        self._agentCrash(agentIndex, quiet=True)
-                        self.unmute()
-                        return
 
-                    move_time += time.time() - start_time
+            ################################### REMOVED AREA
 
-                    # if move_time > self.rules.getMoveWarningTime(agentIndex):
-                    #     self.totalAgentTimeWarnings[agentIndex] += 1
-                    #     print("Agent %d took too long to make a move! This is warning %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
-                    #     if self.totalAgentTimeWarnings[agentIndex] > self.rules.getMaxTimeWarnings(agentIndex):
-                    #         print("Agent %d exceeded the maximum number of warnings: %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
-                    #         self.agentTimeout = True
-                    #         self._agentCrash(agentIndex, quiet=True)
-                    #         self.unmute()
-                    #         return
-
-                    self.totalAgentTimes[agentIndex] += move_time
-                    #print("Agent: %d, time: %f, total: %f" % (agentIndex, move_time, self.totalAgentTimes[agentIndex]))
-                    # if self.totalAgentTimes[agentIndex] > self.rules.getMaxTotalTime(agentIndex):
-                    #     print("Agent %d ran out of time! (time: %1.2f)" % (agentIndex, self.totalAgentTimes[agentIndex]), file=sys.stderr)
-                    #     self.agentTimeout = True
-                    #     self._agentCrash(agentIndex, quiet=True)
-                    #     self.unmute()
-                    #     return
-                    self.unmute()
-                except Exception as data:
-                    self._agentCrash(agentIndex)
-                    self.unmute()
-                    return
-            else:
-                # try:
-                # timed_func = TimeoutFunction(agent.getAction, int(math.ceil(self.state.data.score / (SCALING_FACTOR+1))))
-                # try:
-                #     start_time = time.time()
-                #     action = timed_func(observation)
-                # except TimeoutFunctionException:
-                #     print('You have run out of compute time! You exceeded {:.3f}s of compute'.format(self.state.data.score / (SCALING_FACTOR+1)))
-                #     self.state.data.score = 0
-                #     self.state.data._lose = True
-                #     self.rules.process(self.state, self)
-                #     continue
-                # # except:
-                # #     print('Your agent crashed!')
-                # #     self.state.data.score = 0
-                # #     self.state.data._lose = True
-                # #     self.rules.process(self.state, self)
-                # #     continue
-                # move_time = time.time() - start_time
-                action = agent.getAction(self.state.deepCopy())
-                assert(action in self.state.getLegalActions(agentIndex)), str(self.state) + " "+ str(self.state.getLegalActions(agentIndex)) +" "+str(action) +" " + str(agentIndex)
-                #whoami
-
-            self.unmute()
-
-            self.state.data.score += 0 #whoami max(0,-1 * SCALING_FACTOR)
-            # if self.state.data.score <= 0:
-            #     self.state.data.score = 0
-            #     self.state.data._lose = True
-            #     self.rules.process(self.state, self)
-            #     continue #whoami
-            # if self.state.data.deathCount >= 2:
-            #     self.state.data._lose = True
-            #     self.rules.process(self.state, self)
-            #     continue
-            #     #whoami
-
-            # Execute the action
-            self.moveHistory.append( (agentIndex, action) )
-            if self.catchExceptions:
-                try:
-                    self.state = self.state.generateSuccessor( agentIndex, action )
-                except Exception as data:
-                    self.mute(agentIndex)
-                    self._agentCrash(agentIndex)
-                    self.unmute()
-                    return
-            else:
-                self.state = self.state.generateSuccessor( agentIndex, action )
 
             # Change the display
             self.display.update( self.state.data )
@@ -834,6 +799,8 @@ class Game:
             # Allow for game specific conditions (winning, losing, etc.)
             # print("death counter now ",self.state.data.deathCount, agentIndex)#whoami
             self.rules.process(self.state, self)
+
+            
 
             # print("step ",maihoonnaa,"...",agentIndex) #whoami
             maihoonnaa+=1#whoami
@@ -847,12 +814,18 @@ class Game:
                 boinc.set_fraction_done(self.getProgress())
 
 
+
         # inform a learning agent of the game result
         for agentIndex, agent in enumerate(self.agents):
             if "final" in dir( agent ) :
                 try:
                     self.mute(agentIndex)
-                    agent.final( self.state )
+                    
+                    #whoami
+                    # agent.final( self.state )
+                    (s,a,r,s_n)=random.choice(replay)
+                    agent.final(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
+
                     self.unmute()
                 except Exception as data:
                     if not self.catchExceptions: raise data

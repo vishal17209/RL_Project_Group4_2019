@@ -356,105 +356,183 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		---------------
 
+		self.vision=5
+
 		self.lr = 1e-4
 
-		self.num_agents = 2
+		self.policy_params = np.random.rand((self.vision*self.vision*7)+6, 1) # equal to feature vector size
 
-		self.agent_1 = ReinforcementAgent.__init__(self, **args)
-		self.agent_2 = ReinforcementAgent.__init__(self, **args)
+	
+	def thisIsIT(self, state):
+		pacmanPosition = state.getPacmanPosition(self.index)
+		grid = str(state.data.ToList())
+		grid=grid.split("\n")
+		height, width = state.data.layout.height, state.data.layout.width   
 
-		self.action_values_1 = util.Counter()
-		self.action_values_2 = util.Counter()
-		self.action_values = [self.action_values_1, self.action_values_2]
+		#for vision = (2vision+1)x(2vision+1) #whoami
+		vision=2
+		new_state = grid[max(0, (height-1-pacmanPosition[1])-vision):min(height, (height-pacmanPosition[1])+vision)]
+		for lul in range(len(new_state)):
+			new_state[lul]=new_state[lul][max(0, pacmanPosition[0]-vision):min(len(grid[0]), 1+pacmanPosition[0]+vision)]
+		new_state="\n".join(new_state)
+		
+		return new_state
+		# return state.getPacmanState( self.index ) #whoami
+		# return pacmanPosition #whoami
 
-		self.policy_params_1 = np.random.rand(100, 1) # Fix this!
-		self.policy_params_2 = np.random.rand(100, 1) # Fix this!
-		self.policy_params = [self.policy_params_1, self.policy_params_2]
 
-		self.replay_buffer = util.Counter() # Store as: ((current state, next state), (action 1, action 2), (reward 1, reward 2))
 
-	def getActionValue(self, action, observes, actions, action_values):
+	def getActionValue(self, observes, actions): #unused for now. But can be used if action values needed outside the class
 		"""
 		From big Q function, associate value with agent observation.
 		actions = (action_1, action_2)
 		observes = (observe_1, observe_2)
 		"""
 		# raise NotImplementedError
-		return action_values[(observes, actions)] 
+		return self.action_values[(observes, actions)] 
 
-	def getAction(self, agent_idx, observe, policy_params, state, action_values):
+	
+	def getAction(self, observe, state):
 		"""
 		Uses policy parameters to return actions
 		"""
 		# raise NotImplementedError
-		legal_actions = state.getLegalActions(state, agent_idx) # Make sure that getLegalActions is returning legal actions for our agent.
-		q_values = [(np.dot(np.concatenate((observe, action), axis=None), policy_params), action) for action in legal_actions] # Not bothering with softmax here...
+		legal_actions = state.getLegalActions(self.index) # Make sure that getLegalActions is returning legal actions for our agent.
 
-		return max(q_values)[1]
+		h_values = [] # Not bothering with softmax here...
+		for action in legal_actions:
+			hot=np.zeros(6)
+			if(action=="North"):
+				hot[0]=1
+			elif(action=="East"):
+				hot[1]=1
+			elif(action=="South"):
+				hot[2]=1
+			elif(action=="West"):
+				hot[3]=1
+			elif(action=="Stop"):
+				hot[4]=1
+			else:
+				hot[5]=1
 
-	def getPolicyParamUpdate(self, agent_idx):
+			h_values.append( (np.dot(np.concatenate((observe, hot), axis=None), policy_params), action) )
+
+		
+		return max(h_values)[1]
+
+	
+	
+	def getPolicyParamUpdate(self, curr_state, curr_actions, rewards, next_state):
 		"""
 		Return policy parameter update 
 		"""
 		# raise NotImplementedError
 		# Sample from replay buffer ...
-		states, actions, rewards = np.random.randint(len(self.replay_buffer))
-		observes = self.featureExtractor(states[0])
-		f = np.exp(np.dot(np.concatenate((observes[agent_idx], actions[agent_idx]), axis=None), self.policy_params[agent_idx]))
-		f_sum = 0
-		for i in range(self.num_agents):
-			f_sum += np.exp(np.dot(np.concatenate((observes[i], actions[i]), axis=None), self.policy_params[i]))
+		# states, actions, rewards,  = np.random.randint(len(self.replay_buffer))
 
-		x = f/f_sum
-		return self.lr*(1-x)
+		curr_observe = self.featureExtractor(curr_state.deepCopy()) # for the corresponding agent index.
+		
+		f_sum = 0; temp=np.zeros((self.vision*self.vision*7)+6)
+		for action in curr_state.getLegalActions(self.index):
+			hot=np.zeros(6)
+			if(action=="North"):
+				hot[0]=1
+			elif(action=="East"):
+				hot[1]=1
+			elif(action=="South"):
+				hot[2]=1
+			elif(action=="West"):
+				hot[3]=1
+			elif(action=="Stop"):
+				hot[4]=1
+			else:
+				hot[5]=1
+			
+			val = np.exp(np.dot(np.concatenate((curr_observe, hot), axis=None), self.policy_params))
+			f_sum += val 
+			temp += val*(np.concatenate((curr_observe, hot), axis=None))
 
-	def getActionValueUpdate(self, agent_idx, state, actions, next_state, reward):
+
+		hot=np.zeros(6)
+		if(curr_actions[self.index]=="North"):
+			hot[0]=1
+		elif(curr_actions[self.index]=="East"):
+			hot[1]=1
+		elif(curr_actions[self.index]=="South"):
+			hot[2]=1
+		elif(curr_actions[self.index]=="West"):
+			hot[3]=1
+		elif(curr_actions[self.index]=="Stop"):
+			hot[4]=1
+		else:
+			hot[5]=1
+		
+		policy_params += self.lr*self.action_values[(curr_observe,curr_actions)]*(np.concatenate((curr_observe, hot), axis=None) - (temp/f_sum) )
+
+
+
+	
+	def getActionValueUpdate(self, curr_state, curr_actions, next_state, reward):
 		"""
 		Get ActionValue update (just add to real action value)
 		actions: must be tuple of all actions (indexed)
 		"""
-		curr_observe = self.featureExtractor(state)
-		next_observe = self.featureExtractor(next_state)
+		curr_observe = self.featureExtractor(curr_state.deepCopy())
+		next_observe = self.featureExtractor(next_state.deepCopy())
 		next_actions = []
-		for i in range(self.num_agents):
-			next_actions.append(self.getAction(i, next_observe[i], self.policy_params[i], state, self.action_values[i]))
+		for i in range(len(curr_actions)):
+			next_actions.append(self.getAction( next_observe, state))
 
 		next_actions = tuple(next_actions)
-		return self.alpha*(reward + self.discount*self.getActionValue(next_observe, next_actions) - self.getActionValue(curr_observe, actions))
+
+		self.action_values_num[(curr_observe, curr_actions)]+=1
+		self.action_values[(curr_observe, curr_actions)] += self.alpha*(reward + self.discount*self.action_values[(next_observe, next_actions)] - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
+
+
 
 	def featureExtractor(self, state):
 		"""
 		Return reduced states for all agents in a tuple or list
 		"""
-		raise NotImplementedError
 		
-		offset = 3
-		compressed_state = self.thisIsIT(state)
-		#remove only the line below
-		compressed_state = compressed_state.ToList()
-		food = state.getFood()
-		walls = state.getWalls()
-		ghostPositions = state.getGhostPositions()
-		isscared = state.getGhostStates()[0].scaredTimer > 0
-		pacmanPosition = [state.getPacmanPosition(i) for i in range(self.n)]
-		#state = (encoded food positions, encoded pacman position, encoded wall positions, encoded capsule positions, ghostScared)
-		i_start = pacmanPosition[index] - offset
-		i_end = pacmanPosition[index] + offset
-		j_start = pacmanPosition[index] - offset
-		j_end = pacmanPosition[index] + offset 
+		compressed_state = self.thisIsIT(state.deepCopy())
 		
-		foods = []
-		walls = []
-		for i in range(len(food)):
-			for j in range(len(food[0])):
-				if(food[i][j]):
-					foods.append((i,j))
-				if(walls[i][j]):
-					walls.append(i,j)
+		#7 things from a state
+		pacman=np.zeros(self.vision*self.vision)
+		wall=np.zeros(self.vision*self.vision)
+		space=np.zeros(self.vision*self.vision)
+		pellets=np.zeros(self.vision*self.vision)
+		ghosts=np.zeros(self.vision*self.vision)
+		scared=np.zeros(self.vision*self.vision)
+		powerup=np.zeros(self.vision*self.vision)
 
-		return state
+		it=0
+		for i in compressed_state:
+			if(i=="A"):
+				scared[it]=1
+				it+=1
+			elif(i=="G"):
+				ghosts[it]=1
+				it+=1
+			elif(i=="P"):
+				pacman[it]=1
+				it+=1
+			elif(i=="."):
+				pellets[it]=1
+				it+=1
+			elif(i=="o"):
+				powerup[it]=1
+				it+=1
+			elif(i==" "):
+				space[it]=1
+				it+=1
+			elif(i=="%"):
+				wall[it]=1
+				it+=1
+			else:
+				pass
 
-
+		return np.concatenate((scared, ghosts, pacman, pellet, powerup, space, wall), axis=None)		
 
 
 

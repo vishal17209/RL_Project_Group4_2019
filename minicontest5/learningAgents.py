@@ -103,12 +103,22 @@ class ReinforcementAgent(ValueEstimationAgent):
     #    Override These Functions      #
     ####################################
 
-    def update(self, state, action, nextState, reward):
-        """
-                This class will call this function, which you write, after
-                observing a transition and reward
-        """
+    #whoami
+    # def update(self, state, action, nextState, reward):
+    #     """
+    #             This class will call this function, which you write, after
+    #             observing a transition and reward
+    #     """
+    #     util.raiseNotDefined()
+
+
+    def getActionValueUpdate(self, state, actions, next_state, reward):
         util.raiseNotDefined()
+
+    def getPolicyParamUpdate(self, state, actions, next_state, reward):
+        util.raiseNotDefined()
+
+
 
     ####################################
     #    Read These Functions          #
@@ -130,8 +140,14 @@ class ReinforcementAgent(ValueEstimationAgent):
 
             NOTE: Do *not* override or call this function
         """
-        self.episodeRewards += deltaReward
-        self.update(state,action,nextState,deltaReward)
+        #whoami
+        # self.episodeRewards += deltaReward
+        # self.update(state,action,nextState,deltaReward)
+        self.episodeRewards+=sum(deltaReward)
+        self.getActionValueUpdate(state, action, nextState, deltaReward)
+        self.getPolicyParamUpdate(state, action, nextState, deltaReward)
+
+
 
     def startEpisode(self):
         """
@@ -213,14 +229,17 @@ class ReinforcementAgent(ValueEstimationAgent):
     ###################
     # Pacman Specific #
     ###################
-    def observationFunction(self, state):
+    def observationFunction(self, state,prev_state, reward, act): #prev_state, reward, act are the new addition
         """
             This is where we ended up after our last action.
             The simulation should somehow ensure this is called
         """
-        if not self.lastState is None:
-            reward = state.getScore() - self.lastState.getScore()
-            self.observeTransition(self.lastState, self.lastAction, state, reward)
+
+        self.observeTransition(prev_state, act, state, reward)
+        #whoami
+        # if not self.lastState is None:
+        #     reward = state.getScore() - self.lastState.getScore()
+        #     self.observeTransition(self.lastState, self.lastAction, state, reward)
         return state
 
     def registerInitialState(self, state):
@@ -228,12 +247,13 @@ class ReinforcementAgent(ValueEstimationAgent):
         if self.episodesSoFar == 0:
             print('Beginning %d episodes of Training' % (self.numTraining))
 
-    def final(self, state):
+    def final(self, state, prev_state, reward, act):
         """
           Called by Pacman game at the terminal state
         """
-        deltaReward = state.getScore() - self.lastState.getScore()
-        self.observeTransition(self.lastState, self.lastAction, state, deltaReward)
+        # deltaReward = state.getScore() - self.lastState.getScore()
+        # self.observeTransition(self.lastState, self.lastAction, state, deltaReward)
+        self.observeTransition(prev_state, act, state, reward)
         self.stopEpisode()
 
         # Make sure we have this var
