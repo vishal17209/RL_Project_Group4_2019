@@ -84,7 +84,7 @@ class GameState:
         Returns the legal actions for the agent specified.
         """
 #        GameState.explored.add(self)
-        if self.isWin() or self.isLose(): return []
+        if self.isWin() or self.isLose(): return Directions.STOP #[] whoami
 
         if agentIndex < self.data.numPacmanAgents:
             return PacmanRules.getLegalActions(self, agentIndex)

@@ -91,3 +91,8 @@
                     return
             else:
                 self.state = self.state.generateSuccessor( agentIndex, action )
+
+
+
+Average Score: 514.4871641791193
+Win Rate:      1935/2010 (0.96)

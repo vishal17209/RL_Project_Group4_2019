@@ -339,7 +339,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	"""
 	Default 2 pacmen are spawned
 	"""
-	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=500, **args):	
+	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=2000, **args):	
 
 
 		"You can initialize Q-values here..."
@@ -358,9 +358,9 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		self.blockvision=(2*self.vision)+1
 
-		self.lr = 10**(-4)
+		self.lr = 10**(-3)
 
-		self.policy_params = np.random.rand((self.blockvision*self.blockvision*7)+6) # equal to feature vector size
+		self.policy_params = np.random.rand((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
 	
 	def thisIsIT(self, state):
@@ -398,6 +398,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		"""
 		# raise NotImplementedError
 		legal_actions = state.getLegalActions(self.index) # Make sure that getLegalActions is returning legal actions for our agent.
+		
 
 		observe=self.featureExtractor(state.deepCopy())
 
@@ -443,12 +444,13 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		for i in range(len(temp1)):
 			temp1[i]=temp1[i]/f_sum
 		
+		print(temp1, temp2) #for seeing prob distribution over the possible actions
 		prob_dist=[];acc=0
 		for i in range(len(temp2)):
 			acc+=temp1[i]
 			prob_dist.append(acc)
 		
-		assert(abs(prob_dist[-1]-1)<10**(-4)), "prob_dist sum varying too much from 1 in the end"
+		assert(prob_dist[-1]<=1 and prob_dist[-1]>=0), "prob_dist sum varying too much from 1 in the end"+str(prob_dist)
 
 		if(self.isInTraining()):
 			num=random.random()
@@ -459,7 +461,14 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			return temp2[0]
 		
 		else:
-			return max(h_values)[1]	
+			num=random.random()
+			
+			for i in range(1,len(prob_dist)):
+				if(num<=prob_dist[i] and num>prob_dist[i-1]):
+					return temp2[i]
+			return temp2[0]
+			
+			# return max(h_values)[1]	
 	
 	
 
@@ -473,7 +482,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		curr_observe = self.featureExtractor(curr_state.deepCopy()) # for the corresponding agent index.
 		
-		f_sum = 0; temp=np.zeros((self.blockvision*self.blockvision*7)+6)
+		f_sum = 0; temp=np.zeros((self.blockvision*self.blockvision*7)+5)
 		for action in curr_state.getLegalActions(self.index):
 			hot=np.zeros(6)
 			if(action=="North"):

@@ -25,6 +25,9 @@ class GhostAgent(Agent):
         self.index = index
 
     def getAction(self, state):
+        if(state.isWin() or state.isLose()):#whoami
+            return Directions.STOP
+
         dist = self.getDistribution(state)
         print(dist) #whoami
         if len(dist) == 0:
