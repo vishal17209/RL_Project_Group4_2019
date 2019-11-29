@@ -769,6 +769,7 @@ class Game:
                     else:
                         observation = self.state.deepCopy()
 
+                
                 if(self.state.data.agentStates[i].isPacman):
                     agent.update_the_params( len(samples) )
 
@@ -843,10 +844,10 @@ class Game:
                     for k in range(len(samples)):
                         (s,a,r,s_n)=samples[k]
                         a=list(a);r=list(r)
-                        agent.final(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a),k)
-
+                        observation = agent.observationFunction(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a),k)
+                        
                     if(self.state.data.agentStates[agentIndex].isPacman):
-                        agent.update_the_params( len(samples) )
+                        agent.final(s_n.deepCopy(),len(samples))
 
                     self.unmute()
                 except Exception as data:

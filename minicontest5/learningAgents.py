@@ -248,13 +248,15 @@ class ReinforcementAgent(ValueEstimationAgent):
         if self.episodesSoFar == 0:
             print('Beginning %d episodes of Training' % (self.numTraining))
 
-    def final(self, state, prev_state, reward, act, it):
+    def final(self,state,it):
         """
           Called by Pacman game at the terminal state
         """
         # deltaReward = state.getScore() - self.lastState.getScore()
         # self.observeTransition(self.lastState, self.lastAction, state, deltaReward)
-        self.observeTransition(prev_state, act, state, reward, it)
+        
+        self.update_the_params(it)
+        #whoami # self.observeTransition(prev_state, act, state, reward, it)
         self.stopEpisode()
 
         # Make sure we have this var

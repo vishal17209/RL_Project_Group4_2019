@@ -537,6 +537,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	
 	def update_the_params(self, batch_size):
 		self.policy_params += (self.policy_params_change)/batch_size		
+		print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
 
 	
 	def getActionValueUpdate(self, curr_state, curr_actions, next_state, reward):
@@ -556,8 +557,6 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		next_observe = tuple(next_observe)
 		self.action_values_num[(curr_observe, curr_actions)]+=1
 		self.action_values[(curr_observe, curr_actions)] += self.alpha*(reward[self.index] + self.discount*self.action_values[(next_observe, next_actions)] - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
-
-		print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
 
 
 
