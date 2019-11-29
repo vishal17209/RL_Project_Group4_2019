@@ -339,7 +339,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	"""
 	Default 2 pacmen are spawned
 	"""
-	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=2000, **args):	
+	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=500, **args):	
 
 
 		"You can initialize Q-values here..."
@@ -358,9 +358,9 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		self.blockvision=(2*self.vision)+1
 
-		self.lr = 10**(-3)
+		self.lr = 10**(-4)
 
-		self.policy_params = np.random.rand((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
+		self.policy_params = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
 	
 	def thisIsIT(self, state):
@@ -444,7 +444,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		for i in range(len(temp1)):
 			temp1[i]=temp1[i]/f_sum
 		
-		print(temp1, temp2) #for seeing prob distribution over the possible actions
+		print(temp1, temp2, self.index) #for seeing prob distribution over the possible actions
 		prob_dist=[];acc=0
 		for i in range(len(temp2)):
 			acc+=temp1[i]
