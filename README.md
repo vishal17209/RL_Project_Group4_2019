@@ -8,32 +8,29 @@ Pickle  | python -m pip install pickle-mixin
 Tkinter | sudo apt-get install python-tk
 
 ## Running Game
-Use the following command to get all the possible options for pacman.py
-
-` python pacman.py --help `
-
 To train the model use
 
 ` python pacman.py -n 10010 -l layoutName -g DirectionalGhost -r -q `
 
-This will create record files under ` minicontest1/records/ ` or ` minicontest5/records/ `
+This will add record files under ` minicontest1/records/ ` or ` minicontest5/records/ `
 
 Options | Description
 -------------|--------------
-  -h, --help         |   show this help message and exit
-  -n GAMES, --numGames=GAMES + 10 | the number of GAMES to play [Default: 1]
+  -n GAMES, --numGames=GAMES | the number of GAMES to play, GAMES-numTraining will be used for testing (numTraining is a hyperparamter in the classes of agents in myAgents.py) [Default: 1]
   -l LAYOUT_FILE, --layout=LAYOUT_FILE | the LAYOUT_FILE from which to load the map layout [Options: In layouts/ directory, Default: test51]
   -q, --quietTextGraphics | Generate minimal output and no graphics
   -g TYPE, --ghosts=TYPE | the ghost agent TYPE in the ghostAgents module to use [Options: DirectionalGhost, RandomGhost, Default: RandomGhost]
-  -r, --recordActions |  Writes game histories to a file (named by the time they were played)
+  -r, --recordActions |  Writes game histories to a file (last 10 episodes will be recorded)
 
 ## Replaying Records
-Use Bash script ` script.sh ` to run all the records under the ` minicontest1/ ` or ` minicontest5/ ` directory
+Use Bash script ` script.sh ` to run all the records under the ` minicontest1/records/ ` or ` minicontest5/records/ ` directory
 
                                                 OR
                                                 
 Use the following python command
 ` python pacman.py --replay=FILNAME -l layoutName `
+
+` layoutName ` should be consistent with training layout
 
 ## Changing Parameters
 * To change parameters for agents change the parameters change paramters in ` __init__ ` function of the corresponding agent class in myAgent.py
