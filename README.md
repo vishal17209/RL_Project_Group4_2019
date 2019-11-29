@@ -28,6 +28,7 @@ Use Bash script ` script.sh ` to run all the records under the ` minicontest1/re
                                                 OR
                                                 
 Use the following python command
+
 ` python pacman.py --replay=FILNAME -l layoutName `
 
 ` layoutName ` should be consistent with training layout
