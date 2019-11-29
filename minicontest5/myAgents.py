@@ -358,7 +358,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		self.blockvision=(2*self.vision)+1
 
-		self.lr = 1e-4
+		self.lr = 10**(-4)
 
 		self.policy_params = np.random.rand((self.blockvision*self.blockvision*7)+6) # equal to feature vector size
 
@@ -420,13 +420,48 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			h_values.append( (np.dot(np.concatenate((observe, hot), axis=None), self.policy_params), action) )
 
 		
-		if(random.random() < self.epsilon):
-			return random.choice(h_values)[1]
-		else:
-			return max(h_values)[1]
+		f_sum = 0; temp1=[]; temp2=[] # bothering with softmax here...  lol
+		for action in state.getLegalActions(self.index):
+			hot=np.zeros(6)
+			if(action=="North"):
+				hot[0]=1
+			elif(action=="East"):
+				hot[1]=1
+			elif(action=="South"):
+				hot[2]=1
+			elif(action=="West"):
+				hot[3]=1
+			elif(action=="Stop"):
+				hot[4]=1
+			else:
+				hot[5]=1
+			
+			val = np.exp(np.dot(np.concatenate((observe, hot), axis=None), self.policy_params))
+			f_sum += float(val) 
+			temp1.append(val);temp2.append(action)
 
+		temp1=temp1/f_sum
+		
+		prob_dist=[];acc=0
+		for i in range(len(temp2)):
+			acc+=temp1[i]
+			prob_dist[i]=acc
+		
+		assert(abs(prob_dist[-1]-1)<10**(-4)) "prob_dist sum varying too much from 1 in the end"
+
+		if(self.isInTraining()):
+			num=random.random()
+			
+			for i in range(1,len(prob_dist)):
+				if(num<=prob_dist[i] and num>prob_dist[i-1]):
+					return temp2[i]
+			return temp2[0]
+		
+		else:
+			return max(h_values)[1]	
 	
 	
+
 	def getPolicyParamUpdate(self, curr_state, curr_actions, rewards, next_state):
 		"""
 		Return policy parameter update 

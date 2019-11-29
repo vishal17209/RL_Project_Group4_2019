@@ -175,7 +175,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         # self.alpha=1/(self.episodesSoFar+1) #whoami
         if self.episodesSoFar >= self.numTraining:
             # Take off the training wheels
-            self.epsilon = 0.01 #whoami 0.0    # no exploration
+            self.epsilon =  0.0    # no exploration
             self.alpha = 0.0      # no learning
 
     def isInTraining(self):
