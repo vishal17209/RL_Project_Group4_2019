@@ -173,7 +173,7 @@ class ReinforcementAgent(ValueEstimationAgent):
             self.accumTestRewards += self.episodeRewards
         self.episodesSoFar += 1
         # self.alpha=1/(self.episodesSoFar+1) #whoami
-        self.lr=self.lr*( 1-(1/(self.episodesSoFar+1)) ) #whoami
+        #self.lr=self.lr*( 1-(1/(self.episodesSoFar+1)) ) #whoami
         if self.episodesSoFar >= self.numTraining:
             # Take off the training wheels
             self.epsilon =  0.0    # no exploration
