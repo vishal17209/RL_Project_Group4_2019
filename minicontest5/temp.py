@@ -96,3 +96,8 @@
 
 Average Score: 514.4871641791193
 Win Rate:      1935/2010 (0.96)
+
+
+
+Average Score: -828.3854545454548
+Win Rate:      7/110 (0.06)

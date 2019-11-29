@@ -339,7 +339,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	"""
 	Default 2 pacmen are spawned
 	"""
-	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=500, **args):	
+	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=100, **args):	
 
 
 		"You can initialize Q-values here..."
@@ -453,20 +453,28 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		assert(abs(prob_dist[-1]-1)<10**(-3)), "prob_dist sum varying too much from 1 in the end"+str(prob_dist)
 
 		if(self.isInTraining()):
-			num=random.random()
-			
-			for i in range(1,len(prob_dist)):
-				if(num<=prob_dist[i] and num>prob_dist[i-1]):
-					return temp2[i]
-			return temp2[0]
+			tick=random.random()
+			if(tick<self.epsilon):
+				return random.choice(temp2)
+			else:
+				num=random.random()
+				
+				for i in range(1,len(prob_dist)):
+					if(num<=prob_dist[i] and num>prob_dist[i-1]):
+						return temp2[i]
+				return temp2[0]
 		
 		else:
-			num=random.random()
-			
-			for i in range(1,len(prob_dist)):
-				if(num<=prob_dist[i] and num>prob_dist[i-1]):
-					return temp2[i]
-			return temp2[0]
+			tick=random.random()
+			if(tick<self.epsilon):
+				return random.choice(temp2)
+			else:
+				num=random.random()
+				
+				for i in range(1,len(prob_dist)):
+					if(num<=prob_dist[i] and num>prob_dist[i-1]):
+						return temp2[i]
+				return temp2[0]
 			
 			# return max(h_values)[1]	
 	
