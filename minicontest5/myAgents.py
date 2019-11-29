@@ -359,7 +359,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		self.blockvision=(2*self.vision)+1
 
-		self.lr = 0.1 #10**(-4)
+		self.lr =  10**(-3)
 
 		self.policy_params = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
@@ -549,15 +549,17 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		curr_observe = self.featureExtractor(curr_state.deepCopy())
 		next_observe = self.featureExtractor(next_state.deepCopy())
 
-		max_value=-math.inf #for td error
-		for i in action_values.keys():
-			if(next_observe==i[0] and max_value<self.action_values[i]):
-				max_value=self.action_values[i]
-
-		next_actions = tuple(next_actions)
 		curr_actions = tuple(curr_actions)
 		curr_observe = tuple(curr_observe)
 		next_observe = tuple(next_observe)
+
+		max_value=-math.inf #for td error
+		for i in list(self.action_values.keys()):
+			if(next_observe==i[0] and max_value<self.action_values[i]):
+				max_value=self.action_values[i]
+		if(max_value==-math.inf):
+			max_value=0
+
 		self.action_values_num[(curr_observe, curr_actions)]+=1
 		self.td_error=(reward[self.index] + (self.discount*max_value) - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
 		self.action_values[(curr_observe, curr_actions)] += self.alpha*self.td_error

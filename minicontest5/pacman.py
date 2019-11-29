@@ -692,6 +692,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
     games = []
 
     replay={}; minibatch_size=6 #whoami
+    action_values=[[] for k in range(len(pacmen))]
     for i in range( numGames ):
         beQuiet = i < numTraining
         if beQuiet:
@@ -705,6 +706,8 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
         game = rules.newGame( layout, pacmen, ghosts, gameDisplay, beQuiet, catchExceptions)
         replay=game.run(replay, minibatch_size) #whoami
         if not beQuiet: games.append(game)
+        for k, pac in enumerate(pacmen):
+            action_values[k].append(pac.action_values)
 
         if record and i >= numGames-10:
             import time, pickle
@@ -717,6 +720,18 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
     if (numGames-numTraining) > 0:
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
+        
+        import pickle
+        components = {'action_values': action_values}
+        f = open('action_values','wb+')
+        pickle.dump(components, f)
+        f.close()
+        
+        f = open('scores','wb+')
+        components = {'scores':scores}
+        pickle.dump(components, f)
+        f.close()
+
         winRate = wins.count(True)/ float(len(wins))
         print('Average Score:', sum(scores) / float(len(scores)))
         print('Scores:       ', ', '.join([str(score) for score in scores]))
