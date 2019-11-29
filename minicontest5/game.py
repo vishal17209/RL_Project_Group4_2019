@@ -611,7 +611,7 @@ class Game:
         sys.stderr = OLD_STDERR
 
 
-    def run( self ):
+    def run( self , replay): #whoami
         """
         Main control loop for game play.
         """
@@ -664,7 +664,7 @@ class Game:
 
 
 
-        replay=[];old_score=100
+        old_score=100
         #####################
         # agentIndex = self.startingIndex
         # numAgents = len( self.agents )
@@ -685,7 +685,7 @@ class Game:
                 if(self.state.data.agentStates[i].isPacman):
                     act_vect.append(action)
                 
-            print(tab_ka_state,"tab_ka_state") ; print(action_list,"yahan")
+            # print(tab_ka_state,"tab_ka_state") ; print(action_list,"yahan")
             old_state=self.state.deepCopy();#print(self.state,"wahan")
             for i in range(len(self.agents)):
                 if(self.state.data._win or self.state.data._lose):
@@ -700,12 +700,9 @@ class Game:
                     continue
                 try:    
                     self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
-                    print(self.state),print("focus",i)
                 except Exception:
-                    print("ye lo bhai");print(i);print(action_list);print(tab_ka_state,"tab_ka_state")
-                    print(self.state,"abhi ka state")
-                    raise Exception("Illegal action")
-
+                    print("ye lo bhai")
+                
                 self.display.update( self.state.data )
                 self.rules.process(self.state, self)
 
@@ -728,11 +725,13 @@ class Game:
             assert(len(reward_vect)==self.state.data.numPacmanAgents), "reward vector flawed" + str(reward_vect)
 
             
-            replay.append( ( old_state.deepCopy(),copy.deepcopy(act_vect),copy.deepcopy(reward_vect),self.state.deepCopy() ) )
+            replay[ ( old_state.deepCopy(),tuple(copy.deepcopy(act_vect)),tuple(copy.deepcopy(reward_vect)),self.state.deepCopy() ) ] = 1
 
             
             for i in range(len(self.agents)):
-                (s,a,r,s_n)=random.choice(replay)
+                (s,a,r,s_n)=random.choice(list(replay.keys()))
+                a=list(a)
+                r=list(r)
                 agent=self.agents[i] #i=agentIndex
 
                 
@@ -797,7 +796,7 @@ class Game:
 
             
 
-            print("maihoonnaa ",maihoonnaa,"...") #whoami
+            # print("maihoonnaa ",maihoonnaa,"...") #whoami
             maihoonnaa+=1#whoami
 
             # Track progress
@@ -818,7 +817,8 @@ class Game:
                     
                     #whoami
                     # agent.final( self.state )
-                    (s,a,r,s_n)=random.choice(replay)
+                    (s,a,r,s_n)=random.choice(list(replay.keys()))
+                    a=list(a);r=list(r)
                     agent.final(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
 
                     self.unmute()
@@ -830,3 +830,6 @@ class Game:
             # print("terminal...") #whoami
 
         self.display.finish()
+
+        return replay
+

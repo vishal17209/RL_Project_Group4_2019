@@ -416,7 +416,7 @@ class GhostRules:
             possibleActions.remove( Directions.STOP )
         if reverse in possibleActions and len( possibleActions ) > 1:
             possibleActions.remove( reverse )
-        print(possibleActions,"ho")
+        # print(possibleActions,"ho")
         return possibleActions
     getLegalActions = staticmethod( getLegalActions )
 
@@ -686,6 +686,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
     rules = ClassicGameRules(timeout)
     games = []
 
+    replay={} #whoami
     for i in range( numGames ):
         beQuiet = i < numTraining
         if beQuiet:
@@ -697,7 +698,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
             gameDisplay = display
             rules.quiet = False
         game = rules.newGame( layout, pacmen, ghosts, gameDisplay, beQuiet, catchExceptions)
-        game.run()
+        replay=game.run(replay) #whoami
         if not beQuiet: games.append(game)
 
         if record and i >= numGames-10:

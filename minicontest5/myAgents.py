@@ -339,7 +339,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	"""
 	Default 2 pacmen are spawned
 	"""
-	def __init__(self, epsilon=0.1,gamma=0.9,alpha=1, numTraining=5000, **args):	
+	def __init__(self, epsilon=0.1,gamma=0.9,alpha=1, numTraining=500, **args):	
 
 
 		"You can initialize Q-values here..."
