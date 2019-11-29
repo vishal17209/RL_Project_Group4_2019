@@ -358,7 +358,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		self.blockvision=(2*self.vision)+1
 
-		self.lr = 10**(-4)
+		self.lr = 10**(-3)
 
 		self.policy_params = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
