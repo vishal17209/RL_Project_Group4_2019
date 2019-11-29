@@ -360,7 +360,7 @@ class PacmanRules:
         legal = PacmanRules.getLegalActions( state, agentIndex )
         if action not in legal:
             print(state);print(action) #whoami
-            raise Exception("Illegal action " +str(agentIndex)+" "+ str(action) +" "+str(state) )
+            raise Exception("Illegal action ")
 
         pacmanState = state.data.agentStates[agentIndex]
 
@@ -424,8 +424,7 @@ class GhostRules:
 
         legal = GhostRules.getLegalActions( state, ghostIndex )
         if action not in legal:
-            print(state,"aaja please") #whoami isse hatao turant
-            raise Exception("Illegal ghost action " + str(action))
+            raise Exception("Illegal ghost action ")
 
         ghostState = state.data.agentStates[ghostIndex]
         speed = GhostRules.GHOST_SPEED

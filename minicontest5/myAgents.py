@@ -536,7 +536,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 	
 	def update_the_params(self, batch_size):
-		self.policy_params -= (self.policy_params_change)/batch_size		
+		self.policy_params += (self.policy_params_change)/batch_size		
 		print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
 
 	

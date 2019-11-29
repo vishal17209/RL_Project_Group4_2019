@@ -702,8 +702,13 @@ class Game:
                 try:
                     self.moveHistory.append((i, action_list[i]))    
                     self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
-                except Exception:
-                    print("ye lo bhai")
+                except Exception as e:
+                    if(str(e)=='Can\'t generate a successor of a terminal state.'):
+                        print("this shouldnt happen")
+                        raise Exception(str(e))
+                    elif(str(e)!="Illegal ghost action "):
+                        print("this too shouldnt happen")
+                        raise Exception(str(e))
                 
                 self.display.update( self.state.data )
                 self.rules.process(self.state, self)
