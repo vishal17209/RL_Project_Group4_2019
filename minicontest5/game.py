@@ -698,7 +698,8 @@ class Game:
                         # print("udhar",i)
                         reward_vect.append(0)            
                     continue
-                try:    
+                try:
+                    self.moveHistory.append((i, action_list[i]))    
                     self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
                 except Exception:
                     print("ye lo bhai")
