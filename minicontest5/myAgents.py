@@ -440,12 +440,13 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			f_sum += float(val) 
 			temp1.append(val);temp2.append(action)
 
-		temp1=temp1/f_sum
+		for i in range(len(temp1)):
+			temp1[i]=temp1[i]/f_sum
 		
 		prob_dist=[];acc=0
 		for i in range(len(temp2)):
 			acc+=temp1[i]
-			prob_dist[i]=acc
+			prob_dist.append(acc)
 		
 		assert(abs(prob_dist[-1]-1)<10**(-4)), "prob_dist sum varying too much from 1 in the end"
 
