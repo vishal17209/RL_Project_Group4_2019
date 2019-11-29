@@ -363,7 +363,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		self.policy_params = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
 		#whoami
-		self.policy_params_change = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
+		self.policy_params_change = np.zeros((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
 	
 	def thisIsIT(self, state):
@@ -531,7 +531,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		# self.policy_params += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
 		if(it==0):
-			self.policy_params_change= np.zeros((self.blockvision*self.blockvision*7)+5)
+			self.policy_params_change = np.zeros((self.blockvision*self.blockvision*7)+5)
 		self.policy_params_change += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
 
 	

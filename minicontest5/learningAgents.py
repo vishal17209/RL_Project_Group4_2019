@@ -178,6 +178,8 @@ class ReinforcementAgent(ValueEstimationAgent):
             # Take off the training wheels
             self.epsilon =  0.0    # no exploration
             self.alpha = 0.0      # no learning
+            self.lr = 0 #whoami
+
 
     def isInTraining(self):
         return self.episodesSoFar < self.numTraining
@@ -287,5 +289,5 @@ class ReinforcementAgent(ValueEstimationAgent):
             self.episodeStartTime = time.time()
 
         if self.episodesSoFar == self.numTraining:
-            msg = 'Training Done (turning off epsilon and alpha)'
+            msg = 'Training Done (turning off epsilon and alpha and learning rate)'
             print('%s\n%s' % (msg,'-' * len(msg)))
