@@ -450,7 +450,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 			acc+=temp1[i]
 			prob_dist.append(acc)
 		
-		assert(prob_dist[-1]<=1 and prob_dist[-1]>=0), "prob_dist sum varying too much from 1 in the end"+str(prob_dist)
+		assert(abs(prob_dist[-1]-1)<10**(-3)), "prob_dist sum varying too much from 1 in the end"+str(prob_dist)
 
 		if(self.isInTraining()):
 			num=random.random()
