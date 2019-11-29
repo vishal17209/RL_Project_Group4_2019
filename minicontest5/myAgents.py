@@ -548,11 +548,11 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		"""
 		curr_observe = self.featureExtractor(curr_state.deepCopy())
 		next_observe = self.featureExtractor(next_state.deepCopy())
-		
+
 		max_value=-math.inf #for td error
 		for i in action_values.keys():
 			if(next_observe==i[0] and max_value<self.action_values[i]):
-			max_value=self.action_values[i]
+				max_value=self.action_values[i]
 
 		next_actions = tuple(next_actions)
 		curr_actions = tuple(curr_actions)
