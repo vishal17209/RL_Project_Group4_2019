@@ -22,6 +22,7 @@ import time
 import search
 import copy
 import numpy as np
+import math
 
 """
 IMPORTANT
@@ -339,7 +340,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	"""
 	Default 2 pacmen are spawned
 	"""
-	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=500, **args):	
+	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=1000, **args):	
 
 
 		"You can initialize Q-values here..."
@@ -358,13 +359,13 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		self.blockvision=(2*self.vision)+1
 
-		self.lr = 10**(-4)
+		self.lr = 0.1 #10**(-4)
 
 		self.policy_params = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
 		#whoami
 		self.policy_params_change = np.zeros((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
-
+		self.td_error=1
 	
 	def thisIsIT(self, state):
 		pacmanPosition = state.getPacmanPosition(self.index)
@@ -532,14 +533,14 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		# self.policy_params += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
 		if(it==0):
 			self.policy_params_change = np.zeros((self.blockvision*self.blockvision*7)+5)
-		self.policy_params_change += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
+		self.policy_params_change += self.lr*self.td_error*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
 
 	
 	def update_the_params(self, batch_size):
 		self.policy_params += (self.policy_params_change)/batch_size		
 		print(self.numTraining - self.episodesSoFar,"trainingleft",self.alpha, "alpha",self.discount, "discount") #whoami
 
-	
+
 	def getActionValueUpdate(self, curr_state, curr_actions, next_state, reward):
 		"""
 		Get ActionValue update (just add to real action value)
@@ -547,16 +548,26 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		"""
 		curr_observe = self.featureExtractor(curr_state.deepCopy())
 		next_observe = self.featureExtractor(next_state.deepCopy())
-		next_actions = []
-		for i in range(len(curr_actions)):
-			next_actions.append(self.getAction( next_state ))
+		
+		max_value=-math.inf #for td error
+		for i in action_values.keys():
+			if(next_observe==i[0] and max_value<self.action_values[i]):
+			max_value=self.action_values[i]
 
 		next_actions = tuple(next_actions)
 		curr_actions = tuple(curr_actions)
 		curr_observe = tuple(curr_observe)
 		next_observe = tuple(next_observe)
 		self.action_values_num[(curr_observe, curr_actions)]+=1
-		self.action_values[(curr_observe, curr_actions)] += self.alpha*(reward[self.index] + self.discount*self.action_values[(next_observe, next_actions)] - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
+		self.td_error=(reward[self.index] + (self.discount*max_value) - self.action_values[(curr_observe, curr_actions)])/max(1,self.action_values_num[(curr_observe, curr_actions)])
+		self.action_values[(curr_observe, curr_actions)] += self.alpha*self.td_error
+
+		f = open("actions.txt", "a")
+		f.write("q values\n")
+		f.write(str(curr_state)+"\n")
+		f.write(str(curr_actions)+"\n")
+		f.write(str(self.action_values[(curr_observe, curr_actions)])+"\n")
+		f.close()
 
 
 

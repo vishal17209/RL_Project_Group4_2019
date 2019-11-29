@@ -695,10 +695,24 @@ class Game:
                     # old_score=self.state.data.score
                     # print(self.state,"kahan2")
                     
-                    if(self.state.data.agentStates[i].isPacman):
-                        # print("udhar",i)
-                        reward_vect.append(0)            
-                    continue
+                    # if(self.state.data.agentStates[i].isPacman):
+                    #     # print("udhar",i)
+                    #     reward_vect.append(0)            
+                    # continue
+
+                    for o in range(len(reward_vect)):
+                        if(self.state.data._win):
+                            reward_vect[o]=500
+                        else:
+                            reward_vect[o]=-500
+                    h=len(reward_vect)
+                    for o in range(self.state.data.numPacmanAgents-h):
+                        if(self.state.data._win):
+                            reward_vect.append(500)
+                        else:
+                            reward_vect.append(-500)
+                    break
+
                 try:
                     self.moveHistory.append((i, action_list[i]))    
                     self.state=self.state.generateSuccessor( i, action_list[i] ) #agentIndex, action
@@ -731,7 +745,12 @@ class Game:
 
             assert(len(reward_vect)==self.state.data.numPacmanAgents), "reward vector flawed" + str(reward_vect)
 
-            
+            f = open("actions.txt", "a")
+            f.write("replay ENTRY:\n")
+            f.write(str(old_state.deepCopy())+"\n")
+            f.write(str(tuple(copy.deepcopy(act_vect)))+" "+str(tuple(copy.deepcopy(reward_vect)))+"\n")
+            f.write(str(self.state.deepCopy())+"\n")
+            f.close()
             replay[ ( old_state.deepCopy(),tuple(copy.deepcopy(act_vect)),tuple(copy.deepcopy(reward_vect)),self.state.deepCopy() ) ] = 1
 
             #------------------------------------------------------
