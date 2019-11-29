@@ -1,1 +1,5 @@
-# RL_Project_Group4_2019
+# Cooperative Control in Multi Agent Pacman
+
+## Dependancies
+
+## Running Game
