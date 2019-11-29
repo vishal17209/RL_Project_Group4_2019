@@ -34,3 +34,7 @@ Use Bash script ` script.sh ` to run all the records under the ` minicontest1/ `
                                                 
 Use the following python command
 ` python pacman.py --replay=FILNAME -l layoutName `
+
+## Changing Parameters
+* To change parameters for agents change the parameters change paramters in ` __init__ ` function of the corresponding agent class in myAgent.py
+* To change the mini-batch size change ` minibatch_size ` variable in ` pacman.py ` (line number: 694)
