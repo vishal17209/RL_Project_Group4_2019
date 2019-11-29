@@ -404,7 +404,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 		h_values = [] # Not bothering with softmax here...
 		for action in legal_actions:
-			hot=np.zeros(6)
+			hot=np.zeros(5)
 			if(action=="North"):
 				hot[0]=1
 			elif(action=="East"):
@@ -423,7 +423,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		
 		f_sum = 0; temp1=[]; temp2=[] # bothering with softmax here...  lol
 		for action in state.getLegalActions(self.index):
-			hot=np.zeros(6)
+			hot=np.zeros(5)
 			if(action=="North"):
 				hot[0]=1
 			elif(action=="East"):
@@ -484,7 +484,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		
 		f_sum = 0; temp=np.zeros((self.blockvision*self.blockvision*7)+5)
 		for action in curr_state.getLegalActions(self.index):
-			hot=np.zeros(6)
+			hot=np.zeros(5)
 			if(action=="North"):
 				hot[0]=1
 			elif(action=="East"):
@@ -504,7 +504,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 
 
 
-		hot=np.zeros(6)
+		hot=np.zeros(5)
 		if(curr_actions[self.index]=="North"):
 			hot[0]=1
 		elif(curr_actions[self.index]=="East"):
