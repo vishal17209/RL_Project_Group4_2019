@@ -339,7 +339,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	"""
 	Default 2 pacmen are spawned
 	"""
-	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=100, **args):	
+	def __init__(self, epsilon=0.2,gamma=0.9,alpha=1, numTraining=500, **args):	
 
 
 		"You can initialize Q-values here..."
@@ -361,6 +361,9 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		self.lr = 10**(-3)
 
 		self.policy_params = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
+
+		#whoami
+		self.policy_params_change = np.random.randn((self.blockvision*self.blockvision*7)+5) # equal to feature vector size
 
 	
 	def thisIsIT(self, state):
@@ -480,7 +483,7 @@ class MultiAgentActorCritic(ReinforcementAgent):
 	
 	
 
-	def getPolicyParamUpdate(self, curr_state, curr_actions, rewards, next_state):
+	def getPolicyParamUpdate(self, curr_state, curr_actions, rewards, next_state, it):
 		"""
 		Return policy parameter update 
 		"""
@@ -526,9 +529,14 @@ class MultiAgentActorCritic(ReinforcementAgent):
 		else:
 			hot[5]=1
 
-		self.policy_params += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
+		# self.policy_params += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
+		if(it==0):
+			self.policy_params_change= np.zeros((self.blockvision*self.blockvision*7)+5)
+		self.policy_params_change += self.lr*self.action_values[(tuple(curr_observe),tuple(curr_actions))]*(np.concatenate((curr_observe, hot), axis=0) - (temp/f_sum))
 
-
+	
+	def update_the_params(self, batch_size):
+		self.policy_params += (self.policy_params_change)/batch_size		
 
 	
 	def getActionValueUpdate(self, curr_state, curr_actions, next_state, reward):

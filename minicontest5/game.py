@@ -26,6 +26,7 @@ import math
 import traceback
 import sys
 import copy
+import numpy as np
 
 
 COLLISION_TOLERANCE = 0.0
@@ -611,7 +612,7 @@ class Game:
         sys.stderr = OLD_STDERR
 
 
-    def run( self , replay): #whoami
+    def run( self , replay, minibatch_size): #whoami
         """
         Main control loop for game play.
         """
@@ -728,59 +729,74 @@ class Game:
             
             replay[ ( old_state.deepCopy(),tuple(copy.deepcopy(act_vect)),tuple(copy.deepcopy(reward_vect)),self.state.deepCopy() ) ] = 1
 
+            #------------------------------------------------------
+
             
             for i in range(len(self.agents)):
-                (s,a,r,s_n)=random.choice(list(replay.keys()))
-                a=list(a)
-                r=list(r)
-                agent=self.agents[i] #i=agentIndex
+                holdit=replay.keys()
+                points=np.random.choice([nn for nn in range( len(list(holdit)) )],min(minibatch_size,len(holdit)),False)
+                samples=[]
+                for t in range(points.shape[0]):
+                    samples.append(list(holdit)[points[t]]) #tuples are appended here
 
-                
-                if 'observationFunction' in dir( agent ):
-                    self.mute(i)
-                    if self.catchExceptions:
-                        try:
-                            timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
+                for k in range( len(samples) ):
+                    (s,a,r,s_n)=samples[k]
+                    a=list(a)
+                    r=list(r)
+                    agent=self.agents[i] #i=agentIndex
+
+                    
+                    # Generate an observation of the state
+                    if 'observationFunction' in dir( agent ):
+                        self.mute(i)
+                        if self.catchExceptions:
                             try:
-                                start_time = time.time()
-                                observation = timed_func(self.state.deepCopy())
-                            except TimeoutFunctionException:
-                                skip_action = True
-                            move_time += time.time() - start_time
-                            self.unmute()
-                        except Exception as data:
-                            self._agentCrash(agentIndex, quiet=False)
-                            self.unmute()
-                            return
+                                timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
+                                try:
+                                    start_time = time.time()
+                                    observation = timed_func(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a),k)
+                                except TimeoutFunctionException:
+                                    skip_action = True
+                                move_time += time.time() - start_time
+                                self.unmute()
+                            except Exception as data:
+                                self._agentCrash(agentIndex, quiet=False)
+                                self.unmute()
+                                return
+                        else:
+                            observation = agent.observationFunction(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a),k)
+                        self.unmute()
                     else:
-                        observation = agent.observationFunction(s_n.deepCopy(),s.deepCopy(), copy.deepcopy(r), copy.deepcopy(a))
-                    self.unmute()
-                else:
-                    observation = self.state.deepCopy()
+                        observation = self.state.deepCopy()
+
+                if(self.state.data.agentStates[i].isPacman):
+                    agent.update_the_params( len(samples) )
 
 
-            # Generate an observation of the state
-            if 'observationFunction' in dir( agent ):
-                self.mute(i)
-                if self.catchExceptions:
-                    try:
-                        timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
-                        try:
-                            start_time = time.time()
-                            observation = timed_func(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
-                        except TimeoutFunctionException:
-                            skip_action = True
-                        move_time += time.time() - start_time
-                        self.unmute()
-                    except Exception as data:
-                        self._agentCrash(agentIndex, quiet=False)
-                        self.unmute()
-                        return
-                else:
-                    observation = agent.observationFunction(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
-                self.unmute()
-            else:
-                observation = self.state.deepCopy()
+
+
+            # # Generate an observation of the state
+            # if 'observationFunction' in dir( agent ):
+            #     self.mute(i)
+            #     if self.catchExceptions:
+            #         try:
+            #             timed_func = TimeoutFunction(agent.observationFunction, int(self.rules.getMoveTimeout(agentIndex)))
+            #             try:
+            #                 start_time = time.time()
+            #                 observation = timed_func(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
+            #             except TimeoutFunctionException:
+            #                 skip_action = True
+            #             move_time += time.time() - start_time
+            #             self.unmute()
+            #         except Exception as data:
+            #             self._agentCrash(agentIndex, quiet=False)
+            #             self.unmute()
+            #             return
+            #     else:
+            #         observation = agent.observationFunction(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
+            #     self.unmute()
+            # else:
+            #     observation = self.state.deepCopy()
 
 
             ################################### REMOVED AREA
@@ -815,12 +831,22 @@ class Game:
             if "final" in dir( agent ) :
                 try:
                     self.mute(agentIndex)
-                    
+
                     #whoami
                     # agent.final( self.state )
-                    (s,a,r,s_n)=random.choice(list(replay.keys()))
-                    a=list(a);r=list(r)
-                    agent.final(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a))
+                    holdit=replay.keys()
+                    points=np.random.choice([nn for nn in range( len(list(holdit)) )],min(minibatch_size,len(holdit)),False)
+                    samples=[]
+                    for t in range(points.shape[0]):
+                        samples.append(list(holdit)[points[t]]) #tuples are appended here
+
+                    for k in range(len(samples)):
+                        (s,a,r,s_n)=samples[k]
+                        a=list(a);r=list(r)
+                        agent.final(s_n.deepCopy(),s.deepCopy(),copy.deepcopy(r),copy.deepcopy(a),k)
+
+                    if(self.state.data.agentStates[agentIndex].isPacman):
+                        agent.update_the_params( len(samples) )
 
                     self.unmute()
                 except Exception as data:

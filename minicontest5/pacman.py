@@ -686,7 +686,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
     rules = ClassicGameRules(timeout)
     games = []
 
-    replay={} #whoami
+    replay={}; minibatch_size=4 #whoami
     for i in range( numGames ):
         beQuiet = i < numTraining
         if beQuiet:
@@ -698,7 +698,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
             gameDisplay = display
             rules.quiet = False
         game = rules.newGame( layout, pacmen, ghosts, gameDisplay, beQuiet, catchExceptions)
-        replay=game.run(replay) #whoami
+        replay=game.run(replay, minibatch_size) #whoami
         if not beQuiet: games.append(game)
 
         if record and i >= numGames-10:

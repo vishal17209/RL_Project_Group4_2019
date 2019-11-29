@@ -132,7 +132,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         """
         return self.actionFn(state,self.index)
 
-    def observeTransition(self, state,action,nextState,deltaReward):
+    def observeTransition(self, state,action,nextState,deltaReward,it):
         """
             Called by environment to inform agent that a transition has
             been observed. This will result in a call to self.update
@@ -145,7 +145,7 @@ class ReinforcementAgent(ValueEstimationAgent):
         # self.update(state,action,nextState,deltaReward)
         self.episodeRewards+=sum(deltaReward)
         self.getActionValueUpdate(state, action, nextState, deltaReward)
-        self.getPolicyParamUpdate(state, action, nextState, deltaReward)
+        self.getPolicyParamUpdate(state, action, nextState, deltaReward, it)
 
 
 
@@ -230,13 +230,13 @@ class ReinforcementAgent(ValueEstimationAgent):
     ###################
     # Pacman Specific #
     ###################
-    def observationFunction(self, state,prev_state, reward, act): #prev_state, reward, act are the new addition
+    def observationFunction(self, state,prev_state, reward, act, it): #prev_state, reward, act are the new addition
         """
             This is where we ended up after our last action.
             The simulation should somehow ensure this is called
         """
 
-        self.observeTransition(prev_state, act, state, reward)
+        self.observeTransition(prev_state, act, state, reward, it)
         #whoami
         # if not self.lastState is None:
         #     reward = state.getScore() - self.lastState.getScore()
@@ -248,13 +248,13 @@ class ReinforcementAgent(ValueEstimationAgent):
         if self.episodesSoFar == 0:
             print('Beginning %d episodes of Training' % (self.numTraining))
 
-    def final(self, state, prev_state, reward, act):
+    def final(self, state, prev_state, reward, act, it):
         """
           Called by Pacman game at the terminal state
         """
         # deltaReward = state.getScore() - self.lastState.getScore()
         # self.observeTransition(self.lastState, self.lastAction, state, deltaReward)
-        self.observeTransition(prev_state, act, state, reward)
+        self.observeTransition(prev_state, act, state, reward, it)
         self.stopEpisode()
 
         # Make sure we have this var
