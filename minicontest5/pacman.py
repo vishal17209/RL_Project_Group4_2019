@@ -686,7 +686,7 @@ def runGames( layout, pacmen, ghosts, display, numGames, record, numTraining = 0
     rules = ClassicGameRules(timeout)
     games = []
 
-    replay={}; minibatch_size=4 #whoami
+    replay={}; minibatch_size=6 #whoami
     for i in range( numGames ):
         beQuiet = i < numTraining
         if beQuiet:
