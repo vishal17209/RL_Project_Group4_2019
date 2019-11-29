@@ -29,3 +29,8 @@ Options | Description
 
 ## Replaying Records
 Use Bash script ` script.sh ` to run all the records under the ` minicontest1/ ` or ` minicontest5/ ` directory
+
+                                                OR
+                                                
+Use the following python command
+` python pacman.py --replay=FILNAME -l layoutName `
