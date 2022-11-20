@@ -1,5 +1,5 @@
 # Cooperative Control in Multi Agent Pacman
-All the modifications are on top of the basline pacman API from http://inst.eecs.berkeley.edu/~cs188/fa18/projects.html
+All the modifications are on top of the baseline pacman API from http://inst.eecs.berkeley.edu/~cs188/fa18/projects.html
 
 Use minicontest1 for Qlearning agents and minicontest5 for MultiActor-CentralizedCritic agents
 
